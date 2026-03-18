@@ -97,5 +97,19 @@ export const adminService = {
             headers: getHeaders()
         });
         return handleResponse(response);
+    },
+
+    getStudentsByModule: async (moduleId) => {
+        const response = await fetch(`${API_BASE_URL}/modules/${moduleId}/students`, {
+            headers: getHeaders()
+        });
+        return handleResponse(response);
+    },
+
+    getStudentModules: async (studentId) => {
+        const response = await fetch(`${API_BASE_URL}/users/${studentId}/modules`, {
+            headers: getHeaders()
+        });
+        return handleResponse(response);
     }
 };

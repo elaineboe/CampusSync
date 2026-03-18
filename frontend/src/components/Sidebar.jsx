@@ -24,7 +24,10 @@ function Sidebar() {
 
                 {/* Lecturer & Admin only links */}
                 {(role === 'lecturer' || role === 'admin') && (
-                    <Link to="/manage-events" style={{ ...styles.link, ...(isActive('/manage-events') ? styles.activeLink : {}) }}>Manage Events</Link>
+                    <>
+                        <Link to="/manage-events" style={{ ...styles.link, ...(isActive('/manage-events') ? styles.activeLink : {}) }}>Manage Events</Link>
+                        <Link to="/students" style={{ ...styles.link, ...(isActive('/students') ? styles.activeLink : {}) }}>Students</Link>
+                    </>
                 )}
 
                 {/* Admin only links */}

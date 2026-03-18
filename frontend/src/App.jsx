@@ -10,6 +10,7 @@ import NotificationsPage from './pages/NotificationsPage';
 import SupervisionPage from './pages/SupervisionPage';
 import AdminPage from './pages/AdminPage';
 import UserManagementPage from './pages/UserManagementPage';
+import StudentsPage from './pages/StudentsPage';
 
 function App() {
     return (
@@ -31,6 +32,7 @@ function App() {
                             {/* Role-specific Example */}
                             <Route element={<ProtectedRoute allowedRoles={['lecturer', 'admin']} />}>
                                 <Route path="/manage-events" element={<ManageEventsPage />} />
+                                <Route path="/students" element={<StudentsPage />} />
                             </Route>
 
                             {/* Admin Only Route */}

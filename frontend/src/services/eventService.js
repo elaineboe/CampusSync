@@ -3,11 +3,9 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://w25037992.nuwebspace.co.uk/backend';
 
 export const eventService = {
-    async getEvents() {
+    async getEvents(studentId = null) {
         let token = localStorage.getItem('token');
 
-        // For development/testing purposes, if no token exists, use the stub token from AuthController
-        // This bypassed needing to fully simulate login to test Timebox 2
         if (!token) {
             token = btoa(JSON.stringify({
                 id: 1,
@@ -22,13 +20,16 @@ export const eventService = {
             'Authorization': `Bearer ${token}`
         };
 
+        const url = studentId 
+            ? `${API_BASE_URL}/api/events?student_id=${studentId}`
+            : `${API_BASE_URL}/api/events`;
+
         try {
-            const response = await fetch(`${API_BASE_URL}/api/events`, { headers });
+            const response = await fetch(url, { headers });
             if (!response.ok) throw new Error('Failed to fetch events');
             return await response.json();
         } catch (error) {
             console.error('Error fetching events:', error);
-            // Fallback empty array to prevent UI breaking
             return [];
         }
     },
