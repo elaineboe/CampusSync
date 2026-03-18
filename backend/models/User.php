@@ -86,4 +86,19 @@ class User {
             throw $e;
         }
     }
+
+    public function getUserModules($userId) {
+        if (!$this->conn) return [];
+        $query = "
+            SELECT m.id, m.module_code, m.module_name
+            FROM cs_user_module um
+            JOIN cs_modules m ON um.module_id = m.id
+            WHERE um.user_id = :user_id
+            ORDER BY m.module_code ASC
+        ";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

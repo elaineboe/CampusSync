@@ -69,16 +69,26 @@ class SupervisionController {
         Response::json($slots);
     }
 
-    // Get all confirmed bookings specific to the logged in student
+    // Get all confirmed bookings specific to the student (or for a specific student if requested by Lecturer/Admin)
     public function getMyBookings() {
         $user = AuthMiddleware::authenticate();
 
-        if (!isset($user['role']) || $user['role'] !== 'student') {
-            Response::error('Unauthorized: Only students can have personal bookings', 403);
+        $targetUserId = $user['id'];
+        if (isset($_GET['student_id'])) {
+            if ($user['role'] === 'lecturer' || $user['role'] === 'admin') {
+                $targetUserId = intval($_GET['student_id']);
+            } else {
+                Response::error('Unauthorized: Students can only view their own bookings', 403);
+                return;
+            }
+        } elseif ($user['role'] !== 'student') {
+            // If no student_id provided and user is not a student, they have no "personal" bookings
+            Response::json([]);
+            return;
         }
 
         $supervisionModel = new Supervision();
-        $bookings = $supervisionModel->getStudentBookings($user['id']);
+        $bookings = $supervisionModel->getStudentBookings($targetUserId);
         
         Response::json($bookings);
     }

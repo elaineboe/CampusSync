@@ -112,9 +112,11 @@ if (strpos($parsed_uri, '/events') !== false) {
             $controller->updateRole($userId);
         } elseif ($userId && $action === 'status') {
             $controller->updateStatus($userId);
+        } elseif ($userId && $action === 'modules' && $request_method === 'GET') {
+            $controller->getUserModules($userId);
         } else {
             http_response_code(400);
-            echo json_encode(['error' => 'Invalid PUT request on users']);
+            echo json_encode(['error' => 'Invalid request on users']);
         }
     } else {
         http_response_code(405);
@@ -154,9 +156,16 @@ if (strpos($parsed_uri, '/events') !== false) {
             echo json_encode(['error' => 'Method Not Allowed']);
         }
     } else {
-        // Base /api/modules route OR /api/modules/123 (DELETE)
+        // Base /api/modules route OR /api/modules/123/students
         if ($request_method === 'GET') {
-            $controller->getModules();
+            $moduleId = isset($uri_parts[$modulesIndex + 1]) ? intval($uri_parts[$modulesIndex + 1]) : null;
+            $subAction = isset($uri_parts[$modulesIndex + 2]) ? $uri_parts[$modulesIndex + 2] : null;
+
+            if ($moduleId && $subAction === 'students') {
+                $controller->getStudentsByModule($moduleId);
+            } else {
+                $controller->getModules();
+            }
         } elseif ($request_method === 'POST') {
             $controller->createModule();
         } elseif ($request_method === 'DELETE') {

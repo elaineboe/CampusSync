@@ -1,6 +1,6 @@
 // Default to relative if deployed, or use localhost if local testing (stub proxy setup if needed)
 // As per PRD, the deployment url is http://w25037992.nuwebspace.co.uk
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://w25037992.nuwebspace.co.uk/backend';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export const supervisionService = {
     // ------------------------------------
@@ -15,7 +15,7 @@ export const supervisionService = {
             'Authorization': `Bearer ${token}`
         };
 
-        const response = await fetch(`${API_BASE_URL}/api/supervision/slots`, {
+        const response = await fetch(`${API_BASE_URL}/supervision/slots`, {
             method: 'POST',
             headers,
             body: JSON.stringify(slotData)
@@ -38,7 +38,7 @@ export const supervisionService = {
             'Authorization': `Bearer ${token}`
         };
 
-        const response = await fetch(`${API_BASE_URL}/api/supervision/lecturer/slots`, { headers });
+        const response = await fetch(`${API_BASE_URL}/supervision/lecturer/slots`, { headers });
         if (!response.ok) throw new Error('Failed to fetch personal slots');
 
         return await response.json();
@@ -57,13 +57,13 @@ export const supervisionService = {
             'Authorization': `Bearer ${token}`
         };
 
-        const response = await fetch(`${API_BASE_URL}/api/supervision/slots`, { headers });
+        const response = await fetch(`${API_BASE_URL}/supervision/slots`, { headers });
         if (!response.ok) throw new Error('Failed to fetch global slots');
 
         return await response.json();
     },
 
-    async getMyBookings() {
+    async getMyBookings(studentId = null) {
         let token = localStorage.getItem('token');
         if (!token) throw new Error('Authentication required');
 
@@ -72,8 +72,12 @@ export const supervisionService = {
             'Authorization': `Bearer ${token}`
         };
 
-        const response = await fetch(`${API_BASE_URL}/api/supervision/student/bookings`, { headers });
-        if (!response.ok) throw new Error('Failed to fetch personal bookings');
+        const url = studentId 
+            ? `${API_BASE_URL}/supervision/student/bookings?student_id=${studentId}`
+            : `${API_BASE_URL}/supervision/student/bookings`;
+
+        const response = await fetch(url, { headers });
+        if (!response.ok) throw new Error('Failed to fetch bookings');
 
         return await response.json();
     },
@@ -87,7 +91,7 @@ export const supervisionService = {
             'Authorization': `Bearer ${token}`
         };
 
-        const response = await fetch(`${API_BASE_URL}/api/supervision/book`, {
+        const response = await fetch(`${API_BASE_URL}/supervision/book`, {
             method: 'POST',
             headers,
             body: JSON.stringify({ slot_id: slotId, notes })
@@ -110,7 +114,7 @@ export const supervisionService = {
             'Authorization': `Bearer ${token}`
         };
 
-        const response = await fetch(`${API_BASE_URL}/api/supervision/student/bookings/${bookingId}`, {
+        const response = await fetch(`${API_BASE_URL}/supervision/student/bookings/${bookingId}`, {
             method: 'DELETE',
             headers
         });

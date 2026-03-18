@@ -98,4 +98,19 @@ class Module {
         
         return $stmt->execute();
     }
+
+    public function getStudentsByModule($moduleId) {
+        if (!$this->conn) return [];
+        $query = "
+            SELECT u.id, u.first_name, u.last_name, u.username, u.email
+            FROM cs_user_module um
+            JOIN cs_users u ON um.user_id = u.id
+            WHERE um.module_id = :module_id AND u.role = 'student'
+            ORDER BY u.last_name ASC, u.first_name ASC
+        ";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':module_id', $moduleId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

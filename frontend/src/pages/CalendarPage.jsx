@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import CalendarGrid from '../components/CalendarGrid';
@@ -9,8 +10,13 @@ import { useAuth } from '../context/AuthContext';
 
 function CalendarPage() {
     const { user } = useAuth();
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const studentId = queryParams.get('studentId');
+
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [targetStudentInfo, setTargetStudentInfo] = useState(null);
 
     // Filter and search states
     const [searchQuery, setSearchQuery] = useState('');
@@ -24,46 +30,71 @@ function CalendarPage() {
 
             setLoading(true);
             try {
-                // Fetch primary events
-                const data = await eventService.getEvents();
+                // Determine whose calendar we are fetching
+                const isViewingOther = studentId && (user.role === 'lecturer' || user.role === 'admin');
+                const fetchId = isViewingOther ? studentId : null;
 
-                // If student, also fetch their personal booked supervision slots
+                // Fetch primary events
+                const data = await eventService.getEvents(fetchId);
+
                 let supervisionEvents = [];
-                if (user.role === 'student') {
+                
+                if (isViewingOther) {
+                    // Fetch specifically for the target student
                     try {
-                        const bookings = await supervisionService.getMyBookings();
+                        const bookings = await supervisionService.getMyBookings(fetchId);
                         supervisionEvents = bookings.map(b => ({
-                            id: `sup-${b.booking_id}`, // Prefix ID to avoid collisions
-                            title: `Supervision - ${b.lecturer_first_name} ${b.lecturer_last_name}`,
+                            id: `sup-${b.id || b.booking_id}`,
+                            title: `Supervision Booking`,
                             description: b.notes || '1-on-1 Supervision slot',
                             event_type: 'supervision',
                             location: b.location,
                             start_time: b.start_time,
                             end_time: b.end_time,
-                            module_id: null // Supervisions are generally global or manually linked
-                        }));
-                    } catch (err) {
-                        console.error("Failed to load supervision events for calendar", err);
-                    }
-                }
-
-                // If lecturer, they might want to see slots they are hosting?
-                // For now, the prompt emphasized students seeing their booked slots.
-                if (user.role === 'lecturer' || user.role === 'admin') {
-                    try {
-                        const hostedSlots = await supervisionService.getLecturerSlots();
-                        supervisionEvents = hostedSlots.map(s => ({
-                            id: `sup-${s.id}`,
-                            title: `Hosting Supervision`,
-                            description: `${s.booked_count} student(s) booked`,
-                            event_type: 'supervision',
-                            location: s.location,
-                            start_time: s.start_time,
-                            end_time: s.end_time,
                             module_id: null
                         }));
+
+                        // Fetch student info for display
+                        const allUsers = await adminService.getUsers();
+                        const info = allUsers.find(u => String(u.id) === String(fetchId));
+                        setTargetStudentInfo(info);
                     } catch (err) {
-                        console.error("Failed to load hosted slots for calendar", err);
+                        console.error("Failed to load target student calendar data", err);
+                    }
+                } else {
+                    // Original logic for logged-in user
+                    if (user.role === 'student') {
+                        try {
+                            const bookings = await supervisionService.getMyBookings();
+                            supervisionEvents = bookings.map(b => ({
+                                id: `sup-${b.id || b.booking_id}`, // Match naming
+                                title: `Supervision - ${b.lecturer_first_name} ${b.lecturer_last_name}`,
+                                description: b.notes || '1-on-1 Supervision slot',
+                                event_type: 'supervision',
+                                location: b.location,
+                                start_time: b.start_time,
+                                end_time: b.end_time,
+                                module_id: null
+                            }));
+                        } catch (err) {
+                            console.error("Failed to load supervision events for calendar", err);
+                        }
+                    } else if (user.role === 'lecturer' || user.role === 'admin') {
+                        try {
+                            const hostedSlots = await supervisionService.getLecturerSlots();
+                            supervisionEvents = hostedSlots.map(s => ({
+                                id: `sup-${s.id}`,
+                                title: `Hosting Supervision`,
+                                description: `${s.booked_count} student(s) booked`,
+                                event_type: 'supervision',
+                                location: s.location,
+                                start_time: s.start_time,
+                                end_time: s.end_time,
+                                module_id: null
+                            }));
+                        } catch (err) {
+                            console.error("Failed to load hosted slots for calendar", err);
+                        }
                     }
                 }
 
@@ -91,7 +122,7 @@ function CalendarPage() {
 
         fetchEvents();
         fetchModules();
-    }, [user]);
+    }, [user, studentId]);
 
     // Derive unique modules and types for dropdown options
     const uniqueModules = useMemo(() => {
@@ -125,7 +156,11 @@ function CalendarPage() {
                 <Sidebar />
                 <main className="main-content">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                        <h2 style={{ margin: 0 }}>Calendar</h2>
+                        <h2 style={{ margin: 0 }}>
+                            {targetStudentInfo 
+                                ? `Calendar for ${targetStudentInfo.first_name} ${targetStudentInfo.last_name}` 
+                                : 'Calendar'}
+                        </h2>
 
                         {/* Calendar Controls */}
                         <div className="calendar-controls">

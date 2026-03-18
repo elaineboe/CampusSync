@@ -86,4 +86,23 @@ class UserController {
             Response::error('Critical error updating status: ' . $e->getMessage(), 500);
         }
     }
+
+    public function getUserModules($userId) {
+        $user = AuthMiddleware::authenticate();
+        // Lecturers and Admins can see a student's modules
+        if ($user['role'] !== 'lecturer' && $user['role'] !== 'admin') {
+            Response::error('Unauthorized', 403);
+        }
+
+        ob_start();
+        try {
+            $userModel = new User();
+            $modules = $userModel->getUserModules($userId);
+            if (ob_get_length()) ob_end_clean();
+            Response::json($modules);
+        } catch (Throwable $e) {
+            if (ob_get_length()) ob_end_clean();
+            Response::error('Failed to fetch user modules: ' . $e->getMessage(), 500);
+        }
+    }
 }

@@ -1,6 +1,6 @@
 // Default to relative if deployed, or use localhost if local testing (stub proxy setup if needed)
 // As per PRD, the deployment url is http://w25037992.nuwebspace.co.uk
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://w25037992.nuwebspace.co.uk/backend';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export const eventService = {
     async getEvents(studentId = null) {
@@ -21,8 +21,8 @@ export const eventService = {
         };
 
         const url = studentId 
-            ? `${API_BASE_URL}/api/events?student_id=${studentId}`
-            : `${API_BASE_URL}/api/events`;
+            ? `${API_BASE_URL}/events?student_id=${studentId}`
+            : `${API_BASE_URL}/events`;
 
         try {
             const response = await fetch(url, { headers });
@@ -43,7 +43,7 @@ export const eventService = {
             'Authorization': `Bearer ${token}`
         };
 
-        const response = await fetch(`${API_BASE_URL}/api/events`, {
+        const response = await fetch(`${API_BASE_URL}/events`, {
             method: 'POST',
             headers,
             body: JSON.stringify(eventData)
@@ -66,7 +66,7 @@ export const eventService = {
             'Authorization': `Bearer ${token}`
         };
 
-        const response = await fetch(`${API_BASE_URL}/api/events/${eventId}`, {
+        const response = await fetch(`${API_BASE_URL}/events/${eventId}`, {
             method: 'PUT',
             headers,
             body: JSON.stringify(eventData)
@@ -88,7 +88,7 @@ export const eventService = {
             'Authorization': `Bearer ${token}`
         };
 
-        const response = await fetch(`${API_BASE_URL}/api/events/${eventId}`, {
+        const response = await fetch(`${API_BASE_URL}/events/${eventId}`, {
             method: 'DELETE',
             headers
         });

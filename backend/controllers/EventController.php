@@ -11,9 +11,21 @@ class EventController {
         $user = AuthMiddleware::authenticate();
         $userId = isset($user['id']) ? $user['id'] : 1;
 
+        // NEW: Check if student_id is requested (for Lecturer/Admin view)
+        $targetUserId = $userId;
+        if (isset($_GET['student_id'])) {
+            if ($user['role'] === 'lecturer' || $user['role'] === 'admin') {
+                $targetUserId = intval($_GET['student_id']);
+            } else {
+                if (ob_get_length()) ob_end_clean();
+                Response::error('Unauthorized: Students can only view their own events', 403);
+                return;
+            }
+        }
+
         try {
             $eventModel = new Event();
-            $events = $eventModel->getUserEvents($userId);
+            $events = $eventModel->getUserEvents($targetUserId);
             if (ob_get_length()) ob_end_clean();
             Response::json($events);
         } catch (Throwable $e) {

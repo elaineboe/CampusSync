@@ -149,4 +149,23 @@ class ModuleController {
             Response::error('Critical error deleting module: ' . $e->getMessage(), 500);
         }
     }
+
+    public function getStudentsByModule($moduleId) {
+        $user = AuthMiddleware::authenticate();
+        // Lecturers and Admins can see students in a module
+        if ($user['role'] !== 'lecturer' && $user['role'] !== 'admin') {
+            Response::error('Unauthorized', 403);
+        }
+
+        ob_start();
+        try {
+            $moduleModel = new Module();
+            $students = $moduleModel->getStudentsByModule($moduleId);
+            if (ob_get_length()) ob_end_clean();
+            Response::json($students);
+        } catch (Throwable $e) {
+            if (ob_get_length()) ob_end_clean();
+            Response::error('Failed to fetch students for module: ' . $e->getMessage(), 500);
+        }
+    }
 }
