@@ -8,6 +8,8 @@ function UserManagementPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const usersPerPage = 10;
     
     // Create User Modal State
     const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -40,6 +42,7 @@ function UserManagementPage() {
 
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
+        setCurrentPage(1); // Reset to first page when searching
     };
 
     const handleRoleChange = async (userId, newRole) => {
@@ -80,10 +83,19 @@ function UserManagementPage() {
         }
     };
 
-    const filteredUsers = users.filter(user => {
+    const filteredUsers = Array.isArray(users) ? users.filter(user => {
         const fullString = `${user.first_name} ${user.last_name} ${user.email} ${user.role}`.toLowerCase();
         return fullString.includes(searchQuery.toLowerCase());
-    });
+    }) : [];
+
+    const totalPages = Math.ceil(filteredUsers.length / usersPerPage) || 1;
+    const startIndex = (currentPage - 1) * usersPerPage;
+    const currentUsers = filteredUsers.slice(startIndex, startIndex + usersPerPage);
+
+    // Ensure currentPage is not out of bounds after filtering
+    if (currentPage > totalPages && totalPages > 0) {
+        setCurrentPage(totalPages);
+    }
 
     return (
         <div className="app-container" style={{ flexDirection: 'column' }}>
@@ -181,12 +193,12 @@ function UserManagementPage() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {filteredUsers.length === 0 ? (
+                                        {currentUsers.length === 0 ? (
                                             <tr>
                                                 <td colSpan="5" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-color-light)' }}>No matching users found.</td>
                                             </tr>
                                         ) : (
-                                            filteredUsers.map(user => (
+                                            currentUsers.map(user => (
                                                 <tr key={user.id} style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--white)' }}>
                                                     <td style={{ padding: '1rem 1.5rem', textTransform: 'uppercase', fontSize: '0.875rem', fontWeight: '500' }}>
                                                         {user.first_name} {user.last_name}
@@ -229,6 +241,29 @@ function UserManagementPage() {
                                         )}
                                     </tbody>
                                 </table>
+
+                                {/* Pagination Controls */}
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderTop: '1px solid var(--border-color)', backgroundColor: 'var(--white)' }}>
+                                    <button 
+                                        className="btn-outline" 
+                                        style={{ padding: '0.4rem 1rem', fontSize: '0.875rem', opacity: currentPage === 1 ? 0.5 : 1, cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                        disabled={currentPage === 1}
+                                    >
+                                        Previous
+                                    </button>
+                                    <span style={{ fontSize: '0.875rem', color: 'var(--text-color-light)', textTransform: 'uppercase', fontWeight: 600 }}>
+                                        Page {currentPage} of {totalPages}
+                                    </span>
+                                    <button 
+                                        className="btn-outline" 
+                                        style={{ padding: '0.4rem 1rem', fontSize: '0.875rem', opacity: currentPage === totalPages ? 0.5 : 1, cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
+                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                        disabled={currentPage === totalPages}
+                                    >
+                                        Next
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>

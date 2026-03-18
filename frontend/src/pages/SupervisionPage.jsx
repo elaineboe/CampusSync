@@ -117,6 +117,8 @@ function SupervisionPage() {
         });
     };
 
+    const nowLocalStr = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+
     return (
         <div className="app-container" style={{ flexDirection: 'column' }}>
             <Navbar />
@@ -141,27 +143,22 @@ function SupervisionPage() {
                     ) : (
                         <div className="dashboard-grid">
                             
-                            {/* Compute local time string once per render */}
-                            {(() => {
-                                const nowLocalStr = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-                                return (
-                                    <>
-                                        {/* --- ROLE: LECTURER VIEW --- */}
-                                        {(role === 'lecturer' || role === 'admin') && (
-                                            <>
-                                                <div className="card">
-                                                    <h3>Publish Availability</h3>
-                                                    <form onSubmit={handlePublishSlot} style={{ marginTop: '1rem' }}>
-                                                        <div className="form-group">
-                                                            <label className="form-label">Start Time</label>
-                                                            <input type="datetime-local" required className="form-input" min={nowLocalStr}
-                                                                value={newSlot.start_time} onChange={e => setNewSlot({ ...newSlot, start_time: e.target.value })} />
-                                                        </div>
-                                                        <div className="form-group">
-                                                            <label className="form-label">End Time</label>
-                                                            <input type="datetime-local" required className="form-input" min={newSlot.start_time || nowLocalStr}
-                                                                value={newSlot.end_time} onChange={e => setNewSlot({ ...newSlot, end_time: e.target.value })} />
-                                                        </div>
+                            {/* --- ROLE: LECTURER VIEW --- */}
+                            {(role === 'lecturer' || role === 'admin') && (
+                                <>
+                                    <div className="card">
+                                        <h3>Publish Availability</h3>
+                                        <form onSubmit={handlePublishSlot} style={{ marginTop: '1rem' }}>
+                                            <div className="form-group">
+                                                <label className="form-label">Start Time</label>
+                                                <input type="datetime-local" required className="form-input" min={nowLocalStr}
+                                                    value={newSlot.start_time} onChange={e => setNewSlot({ ...newSlot, start_time: e.target.value })} />
+                                            </div>
+                                            <div className="form-group">
+                                                <label className="form-label">End Time</label>
+                                                <input type="datetime-local" required className="form-input" min={newSlot.start_time || nowLocalStr}
+                                                    value={newSlot.end_time} onChange={e => setNewSlot({ ...newSlot, end_time: e.target.value })} />
+                                            </div>
                                             <div className="form-group">
                                                 <label className="form-label">Location / Link</label>
                                                 <input type="text" placeholder="e.g. Room 402 or Teams Link" className="form-input"
@@ -281,9 +278,6 @@ function SupervisionPage() {
                                     </div>
                                 </>
                             )}
-                            </>
-                        );
-                        })()}
                         </div>
                     )}
                 </main>
