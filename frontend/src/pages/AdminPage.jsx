@@ -8,6 +8,10 @@ function AdminPage() {
     const [modules, setModules] = useState([]);
     const [assignments, setAssignments] = useState([]);
     
+    // Pagination State for Assignments
+    const [currentPage, setCurrentPage] = useState(1);
+    const assignmentsPerPage = 10;
+    
     // Create Module State
     const [newModuleCode, setNewModuleCode] = useState('');
     const [newModuleName, setNewModuleName] = useState('');
@@ -111,6 +115,19 @@ function AdminPage() {
             alert(err.message);
         }
     };
+
+    // Pagination Logic
+    const safeAssignments = Array.isArray(assignments) ? assignments : [];
+    const totalPages = Math.ceil(safeAssignments.length / assignmentsPerPage) || 1;
+    const startIndex = (currentPage - 1) * assignmentsPerPage;
+    const currentAssignments = safeAssignments.slice(startIndex, startIndex + assignmentsPerPage);
+
+    // Reset page if out of bounds after data refresh
+    useEffect(() => {
+        if (currentPage > totalPages && totalPages > 0) {
+            setCurrentPage(totalPages);
+        }
+    }, [assignments, totalPages, currentPage]);
 
     return (
         <div className="app-container" style={{ flexDirection: 'column' }}>
@@ -216,12 +233,12 @@ function AdminPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {assignments.length === 0 ? (
+                                {currentAssignments.length === 0 ? (
                                     <tr>
                                         <td colSpan="3" style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No assignments found.</td>
                                     </tr>
                                 ) : (
-                                    assignments.map((assignment, index) => (
+                                    currentAssignments.map((assignment, index) => (
                                         <tr key={index} style={{ borderBottom: '1px solid var(--border-color)' }}>
                                             <td style={{ padding: '1rem', textTransform: 'uppercase' }}>
                                                 {assignment.first_name} {assignment.last_name}
@@ -243,6 +260,29 @@ function AdminPage() {
                                 )}
                             </tbody>
                         </table>
+
+                        {/* Pagination Controls */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderTop: '1px solid var(--border-color)', backgroundColor: 'var(--white)' }}>
+                            <button 
+                                className="btn-outline" 
+                                style={{ padding: '0.4rem 1rem', fontSize: '0.85rem', opacity: currentPage === 1 ? 0.5 : 1, cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
+                            >
+                                PREVIOUS
+                            </button>
+                            <span style={{ fontSize: '0.85rem', color: '#666', textTransform: 'uppercase', fontWeight: 600 }}>
+                                PAGE {currentPage} OF {totalPages}
+                            </span>
+                            <button 
+                                className="btn-outline" 
+                                style={{ padding: '0.4rem 1rem', fontSize: '0.85rem', opacity: currentPage === totalPages ? 0.5 : 1, cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
+                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                disabled={currentPage === totalPages}
+                            >
+                                NEXT
+                            </button>
+                        </div>
                     </div>
                 </main>
             </div>
