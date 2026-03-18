@@ -100,26 +100,31 @@ if (strpos($parsed_uri, '/events') !== false) {
     require_once __DIR__ . '/../controllers/UserController.php';
     $controller = new UserController();
 
+    // Extract ID and Action (e.g. /api/users/5/modules)
+    $uri_parts = explode('/', parse_url($request_uri, PHP_URL_PATH));
+    $usersIndex = array_search('users', $uri_parts);
+    $userId = ($usersIndex !== false && isset($uri_parts[$usersIndex + 1])) ? intval($uri_parts[$usersIndex + 1]) : null;
+    $action = ($usersIndex !== false && isset($uri_parts[$usersIndex + 2])) ? $uri_parts[$usersIndex + 2] : null;
+
     if ($request_method === 'GET') {
-        $controller->getAllUsers();
+        if ($userId && $action === 'modules') {
+            $controller->getUserModules($userId);
+        } elseif ($userId) {
+            // Placeholder for single user fetch if needed, currently falls back to list
+            $controller->getAllUsers();
+        } else {
+            $controller->getAllUsers();
+        }
     } elseif ($request_method === 'POST') {
         $controller->createUser();
     } elseif ($request_method === 'PUT') {
-        // Find ID and Action (role or status)
-        $uri_parts = explode('/', parse_url($request_uri, PHP_URL_PATH));
-        $usersIndex = array_search('users', $uri_parts);
-        $userId = isset($uri_parts[$usersIndex + 1]) ? intval($uri_parts[$usersIndex + 1]) : null;
-        $action = isset($uri_parts[$usersIndex + 2]) ? $uri_parts[$usersIndex + 2] : null;
-
         if ($userId && $action === 'role') {
             $controller->updateRole($userId);
         } elseif ($userId && $action === 'status') {
             $controller->updateStatus($userId);
-        } elseif ($userId && $action === 'modules' && $request_method === 'GET') {
-            $controller->getUserModules($userId);
         } else {
             http_response_code(400);
-            echo json_encode(['error' => 'Invalid request on users']);
+            echo json_encode(['error' => 'Invalid update action on users']);
         }
     } else {
         http_response_code(405);
