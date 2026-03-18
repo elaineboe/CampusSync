@@ -18,9 +18,7 @@ function Navbar() {
                 <Link to="/dashboard" style={styles.logoText}>CampusSync</Link>
             </div>
             <nav style={styles.nav}>
-                <Link to="/dashboard" style={styles.navLink}>Home</Link>
-                <Link to="/about" style={styles.navLink}>About</Link>
-                <Link to="/support" style={styles.navLink}>Support</Link>
+                {/* Removed Home, About, Support links as per request */}
                 {user ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginLeft: '1rem' }}>
                         <span style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--primary-dark-blue)' }}>{user.first_name || user.username}</span>
