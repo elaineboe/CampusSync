@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://w25037992.nuwebspace.co.uk/backend';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export const notificationService = {
     async getNotifications() {

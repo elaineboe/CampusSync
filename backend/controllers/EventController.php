@@ -43,6 +43,7 @@ class EventController {
         // Auth check: Lecturers and Admins can see any student, Students only themselves
         if ($user['role'] !== 'lecturer' && $user['role'] !== 'admin' && $user['id'] != $studentId) {
             Response::error('Unauthorized', 403);
+            return;
         }
 
         ob_start();
@@ -62,37 +63,53 @@ class EventController {
             $supervisionModel = new Supervision();
 
             // 1. Fetch academic events (module sessions, etc.)
-            $academicEvents = $eventModel->getUserEvents($studentId);
+            $rawAcademicEvents = $eventModel->getUserEvents($studentId);
+            $academicEvents = array_map(function($e) {
+                return [
+                    'id' => $e['id'],
+                    'title' => $e['title'],
+                    'description' => $e['description'],
+                    'location' => $e['location'] ?? 'TBA',
+                    'date' => date('Y-m-d', strtotime($e['start_time'])),
+                    'time' => date('H:i:s', strtotime($e['start_time'])),
+                    'start_time' => $e['start_time'], // keep for compatibility
+                    'end_time' => $e['end_time'],
+                    'type' => 'module_event',
+                    'module_id' => $e['module_id']
+                ];
+            }, $rawAcademicEvents);
 
             // 2. Fetch supervision events based on target role
             $supervisionEvents = [];
             if ($targetUser['role'] === 'student') {
-                // Students see their confirmed bookings
                 $bookings = $supervisionModel->getStudentBookings($studentId);
                 $supervisionEvents = array_map(function($b) {
                     return [
                         'id' => 'sup-' . ($b['booking_id'] ?? $b['id']),
                         'title' => 'Supervision - ' . ($b['lecturer_first_name'] ?? '') . ' ' . ($b['lecturer_last_name'] ?? 'Lecturer'),
                         'description' => $b['notes'] ?: '1-on-1 Supervision slot',
-                        'event_type' => 'supervision',
                         'location' => $b['location'] ?? 'Online/TBA',
+                        'date' => date('Y-m-d', strtotime($b['start_time'])),
+                        'time' => date('H:i:s', strtotime($b['start_time'])),
                         'start_time' => $b['start_time'],
                         'end_time' => $b['end_time'],
+                        'type' => 'supervision_booking',
                         'module_id' => null
                     ];
                 }, $bookings);
             } elseif ($targetUser['role'] === 'lecturer') {
-                // Lecturers see their hosted slots (even if unbooked)
                 $slots = $supervisionModel->getLecturerSlots($studentId);
                 $supervisionEvents = array_map(function($s) {
                     return [
-                        'id' => 'sup-' . $s['id'],
+                        'id' => 'sup-slot-' . $s['id'],
                         'title' => 'Hosting Supervision (' . $s['booked_count'] . ' booked)',
                         'description' => 'Hosted Slot: ' . $s['booked_count'] . ' student(s) booked.',
-                        'event_type' => 'supervision',
-                        'location' => $s['location'],
+                        'location' => $s['location'] ?? 'My Office',
+                        'date' => date('Y-m-d', strtotime($s['start_time'])),
+                        'time' => date('H:i:s', strtotime($s['start_time'])),
                         'start_time' => $s['start_time'],
                         'end_time' => $s['end_time'],
+                        'type' => 'supervision_booking', // Or 'hosted_slot' but user asked for "supervision_booking"
                         'module_id' => null
                     ];
                 }, $slots);
@@ -119,7 +136,14 @@ class EventController {
             Response::json([
                 'allEvents' => $allEvents,
                 'upcomingEvents' => $upcomingEvents,
-                'userRole' => $targetUser['role']
+                'userRole' => $targetUser['role'],
+                'debug' => [
+                    'timestamp' => date('Y-m-d H:i:s'),
+                    'student_id' => $studentId,
+                    'academic_count' => count($academicEvents),
+                    'supervision_count' => count($supervisionEvents),
+                    'raw_bookings' => $bookings ?? []
+                ]
             ]);
         } catch (Throwable $e) {
             if (ob_get_length()) ob_end_clean();

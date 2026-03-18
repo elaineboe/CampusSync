@@ -15,7 +15,7 @@ export const supervisionService = {
             'Authorization': `Bearer ${token}`
         };
 
-        const response = await fetch(`${API_BASE_URL}/supervision/slots`, {
+        const response = await fetch(`${API_BASE_URL}/api/supervision/slots`, {
             method: 'POST',
             headers,
             body: JSON.stringify(slotData)
@@ -38,7 +38,7 @@ export const supervisionService = {
             'Authorization': `Bearer ${token}`
         };
 
-        const response = await fetch(`${API_BASE_URL}/supervision/lecturer/slots`, { headers });
+        const response = await fetch(`${API_BASE_URL}/api/supervision/lecturer/slots`, { headers });
         if (!response.ok) throw new Error('Failed to fetch personal slots');
 
         return await response.json();
@@ -57,7 +57,7 @@ export const supervisionService = {
             'Authorization': `Bearer ${token}`
         };
 
-        const response = await fetch(`${API_BASE_URL}/supervision/slots`, { headers });
+        const response = await fetch(`${API_BASE_URL}/api/supervision/slots`, { headers });
         if (!response.ok) throw new Error('Failed to fetch global slots');
 
         return await response.json();
@@ -73,8 +73,8 @@ export const supervisionService = {
         };
 
         const url = studentId 
-            ? `${API_BASE_URL}/supervision/student/bookings?student_id=${studentId}`
-            : `${API_BASE_URL}/supervision/student/bookings`;
+            ? `${API_BASE_URL}/api/supervision/student/bookings?student_id=${studentId}`
+            : `${API_BASE_URL}/api/supervision/student/bookings`;
 
         const response = await fetch(url, { headers });
         if (!response.ok) throw new Error('Failed to fetch bookings');
@@ -91,7 +91,7 @@ export const supervisionService = {
             'Authorization': `Bearer ${token}`
         };
 
-        const response = await fetch(`${API_BASE_URL}/supervision/book`, {
+        const response = await fetch(`${API_BASE_URL}/api/supervision/book`, {
             method: 'POST',
             headers,
             body: JSON.stringify({ slot_id: slotId, notes })
@@ -114,7 +114,7 @@ export const supervisionService = {
             'Authorization': `Bearer ${token}`
         };
 
-        const response = await fetch(`${API_BASE_URL}/supervision/student/bookings/${bookingId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/supervision/student/bookings/${bookingId}`, {
             method: 'DELETE',
             headers
         });

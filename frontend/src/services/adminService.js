@@ -18,14 +18,14 @@ const getHeaders = () => {
 
 export const adminService = {
     getUsers: async () => {
-        const response = await fetch(`${API_BASE_URL}/users`, {
+        const response = await fetch(`${API_BASE_URL}/api/users`, {
             headers: getHeaders()
         });
         return handleResponse(response);
     },
 
     createUser: async (userData) => {
-        const response = await fetch(`${API_BASE_URL}/users`, {
+        const response = await fetch(`${API_BASE_URL}/api/users`, {
             method: 'POST',
             headers: getHeaders(),
             body: JSON.stringify(userData)
@@ -34,7 +34,7 @@ export const adminService = {
     },
 
     updateUserRole: async (userId, newRole) => {
-        const response = await fetch(`${API_BASE_URL}/users/${userId}/role`, {
+        const response = await fetch(`${API_BASE_URL}/api/users/${userId}/role`, {
             method: 'PUT',
             headers: getHeaders(),
             body: JSON.stringify({ role: newRole })
@@ -43,7 +43,7 @@ export const adminService = {
     },
 
     updateUserStatus: async (userId, isActive) => {
-        const response = await fetch(`${API_BASE_URL}/users/${userId}/status`, {
+        const response = await fetch(`${API_BASE_URL}/api/users/${userId}/status`, {
             method: 'PUT',
             headers: getHeaders(),
             body: JSON.stringify({ is_active: isActive })
@@ -52,14 +52,14 @@ export const adminService = {
     },
 
     getModules: async () => {
-        const response = await fetch(`${API_BASE_URL}/modules`, {
+        const response = await fetch(`${API_BASE_URL}/api/modules`, {
             headers: getHeaders()
         });
         return handleResponse(response);
     },
 
     createModule: async (moduleData) => {
-        const response = await fetch(`${API_BASE_URL}/modules`, {
+        const response = await fetch(`${API_BASE_URL}/api/modules`, {
             method: 'POST',
             headers: getHeaders(),
             body: JSON.stringify(moduleData)
@@ -68,7 +68,7 @@ export const adminService = {
     },
 
     deleteModule: async (moduleId) => {
-        const response = await fetch(`${API_BASE_URL}/modules/${moduleId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/modules/${moduleId}`, {
             method: 'DELETE',
             headers: getHeaders()
         });
@@ -76,14 +76,14 @@ export const adminService = {
     },
 
     getAssignments: async () => {
-        const response = await fetch(`${API_BASE_URL}/modules/assignments`, {
+        const response = await fetch(`${API_BASE_URL}/api/modules/assignments`, {
             headers: getHeaders()
         });
         return handleResponse(response);
     },
 
     assignModules: async (userId, moduleIds) => {
-        const response = await fetch(`${API_BASE_URL}/modules/assign`, {
+        const response = await fetch(`${API_BASE_URL}/api/modules/assign`, {
             method: 'POST',
             headers: getHeaders(),
             body: JSON.stringify({ user_id: userId, module_ids: moduleIds })
@@ -92,7 +92,7 @@ export const adminService = {
     },
 
     removeAssignment: async (userId, moduleId) => {
-        const response = await fetch(`${API_BASE_URL}/modules/assign/${userId}/${moduleId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/modules/assign/${userId}/${moduleId}`, {
             method: 'DELETE',
             headers: getHeaders()
         });
@@ -100,14 +100,14 @@ export const adminService = {
     },
 
     getStudentsByModule: async (moduleId) => {
-        const response = await fetch(`${API_BASE_URL}/modules/${moduleId}/students`, {
+        const response = await fetch(`${API_BASE_URL}/api/modules/${moduleId}/students`, {
             headers: getHeaders()
         });
         return handleResponse(response);
     },
 
     getStudentModules: async (studentId) => {
-        const response = await fetch(`${API_BASE_URL}/users/${studentId}/modules`, {
+        const response = await fetch(`${API_BASE_URL}/api/users/${studentId}/modules`, {
             headers: getHeaders()
         });
         return handleResponse(response);

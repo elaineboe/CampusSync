@@ -81,7 +81,7 @@ function CalendarPage() {
     }, [events]);
 
     const uniqueTypes = useMemo(() => {
-        const types = events.map(e => e.event_type).filter(Boolean);
+        const types = events.map(e => e.type || e.event_type).filter(Boolean);
         return [...new Set(types)];
     }, [events]);
 
@@ -93,7 +93,10 @@ function CalendarPage() {
                 (e.description?.toLowerCase() || '').includes(searchLower);
 
             const matchesModule = moduleFilter ? String(e.module_id) === String(moduleFilter) : true;
-            const matchesType = typeFilter ? (e.event_type?.toLowerCase() || '') === typeFilter.toLowerCase() : true;
+            const matchesType = typeFilter ? (
+                (e.type?.toLowerCase() === typeFilter.toLowerCase()) || 
+                (e.event_type?.toLowerCase() === typeFilter.toLowerCase())
+            ) : true;
 
             return matchesSearch && matchesModule && matchesType;
         });

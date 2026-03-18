@@ -209,12 +209,20 @@ function StudentsPage() {
                                             <p style={{ color: '#666', fontStyle: 'italic' }}>No upcoming events.</p>
                                         ) : (
                                             upcomingEvents.map((ev, idx) => (
-                                                <div key={ev.id || idx} style={{ padding: '1rem', border: '1px solid #000', backgroundColor: '#fff' }}>
-                                                    <p style={{ margin: '0', fontSize: '0.85rem', fontWeight: 'bold' }}>{ev.title}</p>
-                                                    <p style={{ margin: '4px 0 0 0', fontSize: '0.75rem', color: '#666' }}>
-                                                        {new Date(ev.start_time).toLocaleDateString()} {new Date(ev.start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                                <div key={ev.id || idx} style={{ 
+                                                    padding: '1rem', 
+                                                    border: '1px solid #000', 
+                                                    backgroundColor: ev.type === 'supervision_booking' ? '#ecfdf5' : '#fff',
+                                                    borderLeft: ev.type === 'supervision_booking' ? '5px solid #10b981' : '1px solid #000',
+                                                    animation: 'fadeIn 0.3s ease-out'
+                                                }}>
+                                                    <p style={{ margin: '0', fontSize: '0.85rem', fontWeight: 'bold', color: ev.type === 'supervision_booking' ? '#065f46' : 'inherit' }}>
+                                                        {ev.type === 'supervision_booking' ? '📅 ' : ''}{ev.title}
                                                     </p>
-                                                    {ev.location && <p style={{ margin: '4px 0 0 0', fontSize: '0.75rem', fontStyle: 'italic' }}>{ev.location}</p>}
+                                                    <p style={{ margin: '4px 0 0 0', fontSize: '0.75rem', color: ev.type === 'supervision_booking' ? '#065f46' : '#666' }}>
+                                                        {ev.date} {ev.time ? ev.time.slice(0, 5) : ''}
+                                                    </p>
+                                                    {ev.location && <p style={{ margin: '4px 0 0 0', fontSize: '0.75rem', fontStyle: 'italic', color: ev.type === 'supervision_booking' ? '#065f46' : '#666' }}>{ev.location}</p>}
                                                 </div>
                                             ))
                                         )}

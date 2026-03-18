@@ -21,8 +21,8 @@ export const eventService = {
         };
 
         const url = studentId 
-            ? `${API_BASE_URL}/events?student_id=${studentId}`
-            : `${API_BASE_URL}/events`;
+            ? `${API_BASE_URL}/api/events?student_id=${studentId}`
+            : `${API_BASE_URL}/api/events`;
 
         try {
             const response = await fetch(url, { headers });
@@ -43,7 +43,7 @@ export const eventService = {
             'Authorization': `Bearer ${token}`
         };
 
-        const response = await fetch(`${API_BASE_URL}/events`, {
+        const response = await fetch(`${API_BASE_URL}/api/events`, {
             method: 'POST',
             headers,
             body: JSON.stringify(eventData)
@@ -66,7 +66,7 @@ export const eventService = {
             'Authorization': `Bearer ${token}`
         };
 
-        const response = await fetch(`${API_BASE_URL}/events/${eventId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/events/${eventId}`, {
             method: 'PUT',
             headers,
             body: JSON.stringify(eventData)
@@ -88,7 +88,7 @@ export const eventService = {
             'Authorization': `Bearer ${token}`
         };
 
-        const response = await fetch(`${API_BASE_URL}/events/${eventId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/events/${eventId}`, {
             method: 'DELETE',
             headers
         });
@@ -110,8 +110,8 @@ export const eventService = {
         };
 
         const url = studentId 
-            ? `${API_BASE_URL}/events/student?student_id=${studentId}`
-            : `${API_BASE_URL}/events/student`;
+            ? `${API_BASE_URL}/api/events/student?student_id=${studentId}`
+            : `${API_BASE_URL}/api/events/student`;
 
         const response = await fetch(url, { headers });
         if (!response.ok) throw new Error('Failed to fetch student calendar');
