@@ -34,73 +34,23 @@ function CalendarPage() {
                 const isViewingOther = studentId && (user.role === 'lecturer' || user.role === 'admin');
                 const fetchId = isViewingOther ? studentId : null;
 
-                // Fetch primary events
-                const data = await eventService.getEvents(fetchId);
-
-                let supervisionEvents = [];
+                // Unified endpoint handles both academic events and supervision (bookings or hosted)
+                const calendarData = await eventService.getStudentFullCalendar(fetchId);
                 
                 if (isViewingOther) {
-                    // Fetch specifically for the target student
+                    // Still need student info for the page header
                     try {
-                        const bookings = await supervisionService.getMyBookings(fetchId);
-                        supervisionEvents = bookings.map(b => ({
-                            id: `sup-${b.id || b.booking_id}`,
-                            title: `Supervision Booking`,
-                            description: b.notes || '1-on-1 Supervision slot',
-                            event_type: 'supervision',
-                            location: b.location,
-                            start_time: b.start_time,
-                            end_time: b.end_time,
-                            module_id: null
-                        }));
-
-                        // Fetch student info for display
                         const allUsers = await adminService.getUsers();
                         const info = allUsers.find(u => String(u.id) === String(fetchId));
                         setTargetStudentInfo(info);
                     } catch (err) {
-                        console.error("Failed to load target student calendar data", err);
-                    }
-                } else {
-                    // Original logic for logged-in user
-                    if (user.role === 'student') {
-                        try {
-                            const bookings = await supervisionService.getMyBookings();
-                            supervisionEvents = bookings.map(b => ({
-                                id: `sup-${b.id || b.booking_id}`, // Match naming
-                                title: `Supervision - ${b.lecturer_first_name} ${b.lecturer_last_name}`,
-                                description: b.notes || '1-on-1 Supervision slot',
-                                event_type: 'supervision',
-                                location: b.location,
-                                start_time: b.start_time,
-                                end_time: b.end_time,
-                                module_id: null
-                            }));
-                        } catch (err) {
-                            console.error("Failed to load supervision events for calendar", err);
-                        }
-                    } else if (user.role === 'lecturer' || user.role === 'admin') {
-                        try {
-                            const hostedSlots = await supervisionService.getLecturerSlots();
-                            supervisionEvents = hostedSlots.map(s => ({
-                                id: `sup-${s.id}`,
-                                title: `Hosting Supervision`,
-                                description: `${s.booked_count} student(s) booked`,
-                                event_type: 'supervision',
-                                location: s.location,
-                                start_time: s.start_time,
-                                end_time: s.end_time,
-                                module_id: null
-                            }));
-                        } catch (err) {
-                            console.error("Failed to load hosted slots for calendar", err);
-                        }
+                        console.error("Failed to load target student info", err);
                     }
                 }
 
-                setEvents([...data, ...supervisionEvents]);
+                setEvents(calendarData.allEvents);
             } catch (error) {
-                console.error("Failed to fetch events", error);
+                console.error("Failed to fetch unified events", error);
             } finally {
                 setLoading(false);
             }

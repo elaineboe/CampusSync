@@ -110,4 +110,23 @@ class User {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getStudentsForLecturer($lecturerId) {
+        if (!$this->conn) return [];
+        
+        $query = "
+            SELECT DISTINCT u.id, u.username, u.first_name, u.last_name, u.email, u.role, 1 as is_active
+            FROM cs_users u
+            JOIN cs_user_module um_student ON u.id = um_student.user_id
+            JOIN cs_user_module um_lecturer ON um_student.module_id = um_lecturer.module_id
+            WHERE um_lecturer.user_id = :lecturer_id
+              AND u.role = 'student'
+            ORDER BY u.last_name ASC, u.first_name ASC
+        ";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':lecturer_id', $lecturerId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

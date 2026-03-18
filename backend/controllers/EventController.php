@@ -37,10 +37,8 @@ class EventController {
     public function getStudentCalendar() {
         $user = AuthMiddleware::authenticate();
         
-        $studentId = isset($_GET['student_id']) ? intval($_GET['student_id']) : null;
-        if (!$studentId) {
-            Response::error('Student ID is required', 400);
-        }
+        // Use student_id from query if provided (by lecturer/admin), else current user
+        $studentId = isset($_GET['student_id']) ? intval($_GET['student_id']) : $user['id'];
 
         // Auth check: Lecturers and Admins can see any student, Students only themselves
         if ($user['role'] !== 'lecturer' && $user['role'] !== 'admin' && $user['id'] != $studentId) {
@@ -49,27 +47,56 @@ class EventController {
 
         ob_start();
         try {
+            require_once __DIR__ . '/../models/User.php';
+            $userModel = new User();
+            $targetUser = $userModel->getUserById($studentId);
+            
+            if (!$targetUser) {
+                if (ob_get_length()) ob_end_clean();
+                Response::error('User not found', 404);
+                return;
+            }
+
             $eventModel = new Event();
             require_once __DIR__ . '/../models/Supervision.php';
             $supervisionModel = new Supervision();
 
-            // 1. Fetch academic events for all modules the student is in
+            // 1. Fetch academic events (module sessions, etc.)
             $academicEvents = $eventModel->getUserEvents($studentId);
 
-            // 2. Fetch supervision bookings
-            $bookings = $supervisionModel->getStudentBookings($studentId);
-            $supervisionEvents = array_map(function($b) {
-                return [
-                    'id' => 'sup-' . $b['booking_id'],
-                    'title' => 'Supervision - ' . $b['lecturer_first_name'] . ' ' . $b['lecturer_last_name'],
-                    'description' => $b['notes'] ?: '1-on-1 Supervision slot',
-                    'event_type' => 'supervision',
-                    'location' => $b['location'],
-                    'start_time' => $b['start_time'],
-                    'end_time' => $b['end_time'],
-                    'module_id' => null
-                ];
-            }, $bookings);
+            // 2. Fetch supervision events based on target role
+            $supervisionEvents = [];
+            if ($targetUser['role'] === 'student') {
+                // Students see their confirmed bookings
+                $bookings = $supervisionModel->getStudentBookings($studentId);
+                $supervisionEvents = array_map(function($b) {
+                    return [
+                        'id' => 'sup-' . ($b['booking_id'] ?? $b['id']),
+                        'title' => 'Supervision - ' . ($b['lecturer_first_name'] ?? '') . ' ' . ($b['lecturer_last_name'] ?? 'Lecturer'),
+                        'description' => $b['notes'] ?: '1-on-1 Supervision slot',
+                        'event_type' => 'supervision',
+                        'location' => $b['location'] ?? 'Online/TBA',
+                        'start_time' => $b['start_time'],
+                        'end_time' => $b['end_time'],
+                        'module_id' => null
+                    ];
+                }, $bookings);
+            } elseif ($targetUser['role'] === 'lecturer') {
+                // Lecturers see their hosted slots (even if unbooked)
+                $slots = $supervisionModel->getLecturerSlots($studentId);
+                $supervisionEvents = array_map(function($s) {
+                    return [
+                        'id' => 'sup-' . $s['id'],
+                        'title' => 'Hosting Supervision (' . $s['booked_count'] . ' booked)',
+                        'description' => 'Hosted Slot: ' . $s['booked_count'] . ' student(s) booked.',
+                        'event_type' => 'supervision',
+                        'location' => $s['location'],
+                        'start_time' => $s['start_time'],
+                        'end_time' => $s['end_time'],
+                        'module_id' => null
+                    ];
+                }, $slots);
+            }
 
             // Merge all
             $allEvents = array_merge($academicEvents, $supervisionEvents);
@@ -91,7 +118,8 @@ class EventController {
             if (ob_get_length()) ob_end_clean();
             Response::json([
                 'allEvents' => $allEvents,
-                'upcomingEvents' => $upcomingEvents
+                'upcomingEvents' => $upcomingEvents,
+                'userRole' => $targetUser['role']
             ]);
         } catch (Throwable $e) {
             if (ob_get_length()) ob_end_clean();

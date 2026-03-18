@@ -101,7 +101,7 @@ export const eventService = {
         return await response.json();
     },
 
-    async getStudentFullCalendar(studentId) {
+    async getStudentFullCalendar(studentId = null) {
         let token = localStorage.getItem('token');
         if (!token) throw new Error('Authentication required');
 
@@ -109,7 +109,11 @@ export const eventService = {
             'Authorization': `Bearer ${token}`
         };
 
-        const response = await fetch(`${API_BASE_URL}/events/student?student_id=${studentId}`, { headers });
+        const url = studentId 
+            ? `${API_BASE_URL}/events/student?student_id=${studentId}`
+            : `${API_BASE_URL}/events/student`;
+
+        const response = await fetch(url, { headers });
         if (!response.ok) throw new Error('Failed to fetch student calendar');
         return await response.json();
     }

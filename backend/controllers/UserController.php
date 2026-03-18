@@ -6,14 +6,20 @@ require_once __DIR__ . '/../middleware/RoleMiddleware.php';
 
 class UserController {
     public function getAllUsers() {
-        // Enforce Admin only
+        // Allow Admin and Lecturer
         $user = AuthMiddleware::authenticate();
-        RoleMiddleware::authorize(['admin']);
+        RoleMiddleware::authorize(['admin', 'lecturer']);
 
         ob_start();
         try {
             $userModel = new User();
-            $users = $userModel->getAllUsers();
+            
+            if ($user['role'] === 'admin') {
+                $users = $userModel->getAllUsers();
+            } else {
+                // Lecturer only sees their students
+                $users = $userModel->getStudentsForLecturer($user['id']);
+            }
             
             if (ob_get_length()) ob_end_clean();
             Response::json($users);

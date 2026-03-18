@@ -8,77 +8,73 @@ import { useAuth } from '../context/AuthContext';
 
 function StudentsPage() {
     const { user } = useAuth();
-    const [modules, setModules] = useState([]);
     const [students, setStudents] = useState([]);
-    const [selectedModule, setSelectedModule] = useState('');
-    const [selectedStudent, setSelectedStudent] = useState('');
-    const [studentInfo, setStudentInfo] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const studentsPerPage = 10;
+
+    // Student Detail State (Calendar View)
+    const [selectedStudent, setSelectedStudent] = useState(null);
     const [studentModules, setStudentModules] = useState([]);
     const [events, setEvents] = useState([]);
     const [upcomingEvents, setUpcomingEvents] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const calendarRef = useRef(null);
+    const [isCalendarLoading, setIsCalendarLoading] = useState(false);
+    const calendarSectionRef = useRef(null);
 
     useEffect(() => {
-        const fetchLecturerModules = async () => {
-            try {
-                const data = await adminService.getModules();
-                setModules(data);
-            } catch (err) {
-                console.error("Failed to fetch modules", err);
-            }
-        };
-        fetchLecturerModules();
+        fetchStudents();
     }, []);
 
-    const handleModuleChange = async (moduleId) => {
-        setSelectedModule(moduleId);
-        setSelectedStudent('');
-        setStudentInfo(null);
-        setEvents([]);
-        setUpcomingEvents([]);
-        if (!moduleId) {
-            setStudents([]);
-            return;
-        }
+    const fetchStudents = async () => {
+        setIsLoading(true);
         try {
-            const data = await adminService.getStudentsByModule(moduleId);
-            setStudents(data);
+            // Using the unified users endpoint which is now filtered for lecturers
+            const data = await adminService.getUsers();
+            // Filter to only students
+            setStudents(Array.isArray(data) ? data.filter(u => u.role === 'student') : []);
         } catch (err) {
             console.error("Failed to fetch students", err);
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    const handleStudentChange = async (studentId) => {
-        setSelectedStudent(studentId);
-        if (!studentId) {
-            setStudentInfo(null);
-            setEvents([]);
-            setUpcomingEvents([]);
-            return;
-        }
+    const handleViewSchedule = async (student) => {
+        setSelectedStudent(student);
+        setIsCalendarLoading(true);
+        setEvents([]);
+        setUpcomingEvents([]);
 
-        setLoading(true);
         try {
-            // Task 2: Profile & Modules
-            const studentData = await adminService.getStudentModules(studentId);
+            // Step 1: Fetch Profile & Modules (Task 2 logic)
+            const studentData = await adminService.getStudentModules(student.id);
             setStudentModules(studentData.modules);
-            setStudentInfo(studentData.profile);
-
-            // Task 3: Full Calendar & Upcoming
-            const calendarData = await eventService.getStudentFullCalendar(studentId);
+            
+            // Step 2: Fetch Multi-Calendar (Task 3 logic)
+            const calendarData = await eventService.getStudentFullCalendar(student.id);
             setEvents(calendarData.allEvents);
             setUpcomingEvents(calendarData.upcomingEvents);
+
+            // Scroll to calendar
+            setTimeout(() => {
+                calendarSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
         } catch (err) {
-            console.error("Failed to fetch student data", err);
+            console.error("Failed to load student schedule", err);
         } finally {
-            setLoading(false);
+            setIsCalendarLoading(false);
         }
     };
 
-    const scrollToCalendar = () => {
-        calendarRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
+    const filteredStudents = students.filter(s => {
+        const fullString = `${s.first_name} ${s.last_name} ${s.email} ${s.username}`.toLowerCase();
+        return fullString.includes(searchQuery.toLowerCase());
+    });
+
+    const totalPages = Math.ceil(filteredStudents.length / studentsPerPage) || 1;
+    const startIndex = (currentPage - 1) * studentsPerPage;
+    const currentStudents = filteredStudents.slice(startIndex, startIndex + studentsPerPage);
 
     return (
         <div className="app-container" style={{ flexDirection: 'column' }}>
@@ -86,113 +82,155 @@ function StudentsPage() {
             <div className="main-flex">
                 <Sidebar />
                 <main className="main-content">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                        <h2 style={{ margin: 0, textTransform: 'uppercase' }}>Student Schedule - Lecturer</h2>
-                        
-                        <div style={{ display: 'flex', gap: '1rem' }}>
-                            <select 
-                                className="form-input" 
-                                style={{ width: '200px' }}
-                                value={selectedModule}
-                                onChange={(e) => handleModuleChange(e.target.value)}
-                            >
-                                <option value="">SELECT MODULE</option>
-                                {modules.map(m => (
-                                    <option key={m.id} value={m.id}>{m.module_code} - {m.module_name}</option>
-                                ))}
-                            </select>
+                    <h1 style={{ fontSize: '1.75rem', marginBottom: '2rem', textTransform: 'uppercase', color: 'var(--primary-dark-blue)' }}>
+                        Students Schedule
+                    </h1>
 
-                            <select 
-                                className="form-input" 
-                                style={{ width: '200px' }}
-                                value={selectedStudent}
-                                onChange={(e) => handleStudentChange(e.target.value)}
-                                disabled={!selectedModule}
+                    {/* Table View (Reusing Admin component rendering logic) */}
+                    <div className="card" style={{ padding: 0, overflow: 'hidden', marginBottom: '2rem', border: '1px solid var(--border-color)', borderRadius: '0' }}>
+                        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <input 
+                                type="text"
+                                placeholder="SEARCH STUDENTS"
+                                className="form-input"
+                                style={{ width: '300px', marginBottom: '0', height: '40px' }}
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+
+                        <div style={{ overflowX: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                                <thead>
+                                    <tr style={{ borderBottom: '2px solid black', backgroundColor: '#f8fafc' }}>
+                                        <th style={{ padding: '1rem 1.5rem', fontWeight: 'bold', textTransform: 'uppercase', fontSize: '0.85rem' }}>Name</th>
+                                        <th style={{ padding: '1rem 1.5rem', fontWeight: 'bold', textTransform: 'uppercase', fontSize: '0.85rem' }}>Student ID</th>
+                                        <th style={{ padding: '1rem 1.5rem', fontWeight: 'bold', textTransform: 'uppercase', fontSize: '0.85rem' }}>Email</th>
+                                        <th style={{ padding: '1rem 1.5rem', fontWeight: 'bold', textTransform: 'uppercase', fontSize: '0.85rem', textAlign: 'right' }}>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {isLoading ? (
+                                        <tr><td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>Loading students...</td></tr>
+                                    ) : currentStudents.length === 0 ? (
+                                        <tr><td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No students found.</td></tr>
+                                    ) : (
+                                        currentStudents.map(s => (
+                                            <tr key={s.id} style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--white)' }}>
+                                                <td style={{ padding: '1rem 1.5rem', textTransform: 'uppercase', fontSize: '0.875rem', fontWeight: '500' }}>{s.first_name} {s.last_name}</td>
+                                                <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem' }}>{s.username}</td>
+                                                <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem' }}>{s.email}</td>
+                                                <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
+                                                    <button 
+                                                        className="btn-outline"
+                                                        style={{ 
+                                                            padding: '0.25rem 0.75rem', 
+                                                            fontSize: '0.75rem', 
+                                                            textTransform: 'uppercase',
+                                                            borderColor: 'black',
+                                                            color: 'black'
+                                                        }}
+                                                        onClick={() => handleViewSchedule(s)}
+                                                    >
+                                                        VIEW SCHEDULE
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Pagination Controls */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderTop: '1px solid var(--border-color)', backgroundColor: 'var(--white)' }}>
+                            <button 
+                                className="btn-outline" 
+                                style={{ padding: '0.4rem 1rem', fontSize: '0.875rem', opacity: currentPage === 1 ? 0.5 : 1, cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
                             >
-                                <option value="">SELECT STUDENT</option>
-                                {students.map(s => (
-                                    <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>
-                                ))}
-                            </select>
+                                PREVIOUS
+                            </button>
+                            <span style={{ fontSize: '0.875rem', color: 'var(--text-color-light)', textTransform: 'uppercase', fontWeight: 600 }}>
+                                PAGE {currentPage} OF {totalPages}
+                            </span>
+                            <button 
+                                className="btn-outline" 
+                                style={{ padding: '0.4rem 1rem', fontSize: '0.875rem', opacity: currentPage === totalPages ? 0.5 : 1, cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
+                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                disabled={currentPage === totalPages}
+                            >
+                                NEXT
+                            </button>
                         </div>
                     </div>
 
-                    {studentInfo ? (
-                        <>
-                            {/* Student Info Banner */}
-                            <div className="card" style={{ marginBottom: '2rem', padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', border: '2px solid #000', borderRadius: '0' }}>
-                                <div>
-                                    <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                                        {studentInfo.first_name} {studentInfo.last_name}
-                                    </h1>
-                                    <p style={{ margin: '0.25rem 0', fontWeight: 'bold', textTransform: 'uppercase' }}>Student ID: [{studentInfo.username}]</p>
-                                    <p style={{ margin: '0.25rem 0', fontWeight: 'bold', textTransform: 'uppercase' }}>Email: {studentInfo.email}</p>
-                                    
-                                    <div style={{ marginTop: '1.5rem' }}>
+                    {/* Schedule Section */}
+                    {selectedStudent && (
+                        <div ref={calendarSectionRef} style={{ animation: 'fadeIn 0.5s ease-in', marginTop: '3rem' }}>
+                            <h2 style={{ textTransform: 'uppercase', fontSize: '1.25rem', marginBottom: '1.5rem', borderBottom: '2px solid #000', paddingBottom: '0.5rem', display: 'inline-block' }}>
+                                Schedule for {selectedStudent.first_name} {selectedStudent.last_name}
+                            </h2>
+
+                             <div className="card" style={{ marginBottom: '2rem', padding: '1.5rem', border: '1px solid #000', borderRadius: '0', backgroundColor: '#f8fafc' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                    <div>
+                                        <h3 style={{ margin: '0 0 0.5rem 0', textTransform: 'uppercase' }}>{selectedStudent.first_name} {selectedStudent.last_name}</h3>
+                                        <p style={{ margin: '0.25rem 0', fontWeight: 'bold' }}>ID: {selectedStudent.username}</p>
+                                        <p style={{ margin: '0.25rem 0', fontWeight: 'bold' }}>EMAIL: {selectedStudent.email}</p>
+                                    </div>
+                                    <div style={{ textAlign: 'right' }}>
                                         <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.85rem', fontWeight: 'bold', textTransform: 'uppercase' }}>Enrolled Modules</p>
-                                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                                             {studentModules.map(m => (
-                                                <span key={m.id} style={{ padding: '0.25rem 0.75rem', border: '1px solid #000', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                                                <span key={m.id} style={{ padding: '0.25rem 0.75rem', border: '1px solid #000', fontSize: '0.75rem', fontWeight: 'bold', backgroundColor: '#fff' }}>
                                                     {m.module_code}
                                                 </span>
                                             ))}
                                         </div>
                                     </div>
                                 </div>
-                                 <button 
-                                    className="btn-outline" 
-                                    style={{ padding: '0.5rem 1.5rem', fontWeight: 'bold', textTransform: 'uppercase' }}
-                                    onClick={scrollToCalendar}
-                                >
-                                    View Full Calendar
-                                </button>
                             </div>
 
-                            <h3 style={{ textTransform: 'uppercase', fontSize: '1.2rem', marginBottom: '1.5rem', borderBottom: '2px solid #000', paddingBottom: '0.5rem', display: 'inline-block' }}>
-                                Calendar for {studentInfo.first_name} {studentInfo.last_name}
-                            </h3>
-
-                            <div ref={calendarRef} style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '2rem' }}>
-                                {/* Calendar View */}
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '2rem' }}>
                                 <div className="card" style={{ padding: 0, borderRadius: 0, border: '1px solid #000', overflow: 'hidden' }}>
-                                    <div style={{ padding: '1rem', borderBottom: '1px solid #000', display: 'flex', justifyContent: 'space-between', backgroundColor: '#fff' }}>
-                                        <span style={{ fontWeight: 'bold' }}>SEARCH BAR</span>
-                                        <span style={{ fontWeight: 'bold' }}>MODULE FILTER ▼</span>
-                                    </div>
-                                    {loading ? (
-                                        <div style={{ padding: '4rem', textAlign: 'center' }}>Loading calendar...</div>
+                                    {isCalendarLoading ? (
+                                        <div style={{ padding: '4rem', textAlign: 'center' }}>Loading calendar data...</div>
                                     ) : (
                                         <CalendarGrid events={events} />
                                     )}
                                 </div>
 
-                                {/* Upcoming Events */}
                                 <div>
-                                    <h3 style={{ textTransform: 'uppercase', fontSize: '1.1rem', marginBottom: '1rem', borderBottom: '2px solid #000', paddingBottom: '0.5rem' }}>Upcoming Events</h3>
+                                    <h3 style={{ textTransform: 'uppercase', fontSize: '1rem', marginBottom: '1rem', borderBottom: '2px solid #000', paddingBottom: '0.5rem' }}>Upcoming Events</h3>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                         {upcomingEvents.length === 0 ? (
                                             <p style={{ color: '#666', fontStyle: 'italic' }}>No upcoming events.</p>
                                         ) : (
                                             upcomingEvents.map((ev, idx) => (
-                                                <div key={ev.id || idx} style={{ padding: '1rem', border: '1px solid #000' }}>
-                                                    <div style={{ height: '12px', background: '#eee', marginBottom: '8px', width: '80%' }}></div>
-                                                    <div style={{ height: '8px', background: '#f5f5f5', width: '40%' }}></div>
-                                                    <p style={{ margin: '8px 0 0 0', fontSize: '0.85rem', fontWeight: 'bold' }}>{ev.title}</p>
-                                                    <p style={{ margin: '2px 0 0 0', fontSize: '0.75rem', color: '#666' }}>{new Date(ev.start_time).toLocaleDateString()} {new Date(ev.start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                                                <div key={ev.id || idx} style={{ padding: '1rem', border: '1px solid #000', backgroundColor: '#fff' }}>
+                                                    <p style={{ margin: '0', fontSize: '0.85rem', fontWeight: 'bold' }}>{ev.title}</p>
+                                                    <p style={{ margin: '4px 0 0 0', fontSize: '0.75rem', color: '#666' }}>
+                                                        {new Date(ev.start_time).toLocaleDateString()} {new Date(ev.start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                                    </p>
+                                                    {ev.location && <p style={{ margin: '4px 0 0 0', fontSize: '0.75rem', fontStyle: 'italic' }}>{ev.location}</p>}
                                                 </div>
                                             ))
                                         )}
                                     </div>
                                 </div>
                             </div>
-                        </>
-                    ) : (
-                        <div className="card" style={{ padding: '4rem', textAlign: 'center', border: '1px dashed #ccc' }}>
-                            <p style={{ fontSize: '1.2rem', color: '#666' }}>Please select a module and a student to view their schedule.</p>
                         </div>
                     )}
                 </main>
             </div>
+            <style>{`
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            `}</style>
         </div>
     );
 }
