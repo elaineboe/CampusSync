@@ -57,6 +57,9 @@ function EventForm({ initialData = null, modules = [], onSubmit, onCancel, isLoa
         onSubmit(submissionData);
     };
 
+    // Get current local time string for the HTML5 min attribute
+    const nowLocalStr = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+
     return (
         <form onSubmit={handleSubmit} style={{ width: '100%' }}>
             <div className="form-group" style={{ marginBottom: '1.5rem' }}>
@@ -112,6 +115,7 @@ function EventForm({ initialData = null, modules = [], onSubmit, onCancel, isLoa
                         className="form-input"
                         value={formData.start_time}
                         onChange={handleChange}
+                        min={initialData ? undefined : nowLocalStr}
                         required
                     />
                 </div>
@@ -123,6 +127,7 @@ function EventForm({ initialData = null, modules = [], onSubmit, onCancel, isLoa
                         className="form-input"
                         value={formData.end_time}
                         onChange={handleChange}
+                        min={formData.start_time || nowLocalStr}
                         required
                     />
                 </div>
