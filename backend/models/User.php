@@ -60,10 +60,30 @@ class User {
     public function updateUserStatus($userId, $isActive) {
         if (!$this->conn) return false;
         
-        $query = "UPDATE cs_users SET is_active = :is_active WHERE id = :id";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindValue(':is_active', $isActive ? 1 : 0, PDO::PARAM_INT);
-        $stmt->bindValue(':id', $userId, PDO::PARAM_INT);
-        return $stmt->execute();
+        try {
+            $query = "UPDATE cs_users SET is_active = :is_active WHERE id = :id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindValue(':is_active', $isActive ? 1 : 0, PDO::PARAM_INT);
+            $stmt->bindValue(':id', $userId, PDO::PARAM_INT);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            // Check if error is "Unknown column 'is_active'"
+            if (strpos($e->getMessage(), 'is_active') !== false) {
+                try {
+                    // Self-heal: Attempt to add the column automatically
+                    $this->conn->exec("ALTER TABLE cs_users ADD COLUMN is_active BOOLEAN DEFAULT TRUE");
+                    
+                    // Retry the update
+                    $query = "UPDATE cs_users SET is_active = :is_active WHERE id = :id";
+                    $stmt = $this->conn->prepare($query);
+                    $stmt->bindValue(':is_active', $isActive ? 1 : 0, PDO::PARAM_INT);
+                    $stmt->bindValue(':id', $userId, PDO::PARAM_INT);
+                    return $stmt->execute();
+                } catch (PDOException $e2) {
+                    throw new Exception("Critical error updating status: " . $e2->getMessage());
+                }
+            }
+            throw $e;
+        }
     }
 }
