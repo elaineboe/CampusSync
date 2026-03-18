@@ -89,17 +89,22 @@ class UserController {
 
     public function getUserModules($userId) {
         $user = AuthMiddleware::authenticate();
-        // Lecturers and Admins can see a student's modules
-        if ($user['role'] !== 'lecturer' && $user['role'] !== 'admin') {
+        // Lecturers and Admins can see a student's modules, or the student themselves
+        if ($user['role'] !== 'lecturer' && $user['role'] !== 'admin' && $user['id'] != $userId) {
             Response::error('Unauthorized', 403);
         }
 
         ob_start();
         try {
             $userModel = new User();
+            $profile = $userModel->getUserById($userId);
             $modules = $userModel->getUserModules($userId);
+            
             if (ob_get_length()) ob_end_clean();
-            Response::json($modules);
+            Response::json([
+                'profile' => $profile,
+                'modules' => $modules
+            ]);
         } catch (Throwable $e) {
             if (ob_get_length()) ob_end_clean();
             Response::error('Failed to fetch user modules: ' . $e->getMessage(), 500);

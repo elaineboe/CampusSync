@@ -87,6 +87,15 @@ class User {
         }
     }
 
+    public function getUserById($userId) {
+        if (!$this->conn) return null;
+        $query = "SELECT id, username, first_name, last_name, email, role FROM cs_users WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function getUserModules($userId) {
         if (!$this->conn) return [];
         $query = "

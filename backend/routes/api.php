@@ -17,10 +17,13 @@ if (strpos($parsed_uri, '/events') !== false) {
     $eventId = ($eventsIndex !== false && isset($uri_parts[$eventsIndex + 1])) ? intval($uri_parts[$eventsIndex + 1]) : null;
 
     $isHistoryAction = (strpos($request_uri, '/events/history') !== false);
+    $isStudentCalendar = (strpos($request_uri, '/events/student') !== false);
 
     if ($request_method === 'GET') {
         if ($isHistoryAction) {
             $controller->getEventHistory();
+        } elseif ($isStudentCalendar) {
+            $controller->getStudentCalendar();
         } else {
             $controller->getEvents();
         }

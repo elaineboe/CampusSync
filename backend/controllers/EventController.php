@@ -34,6 +34,71 @@ class EventController {
         }
     }
 
+    public function getStudentCalendar() {
+        $user = AuthMiddleware::authenticate();
+        
+        $studentId = isset($_GET['student_id']) ? intval($_GET['student_id']) : null;
+        if (!$studentId) {
+            Response::error('Student ID is required', 400);
+        }
+
+        // Auth check: Lecturers and Admins can see any student, Students only themselves
+        if ($user['role'] !== 'lecturer' && $user['role'] !== 'admin' && $user['id'] != $studentId) {
+            Response::error('Unauthorized', 403);
+        }
+
+        ob_start();
+        try {
+            $eventModel = new Event();
+            require_once __DIR__ . '/../models/Supervision.php';
+            $supervisionModel = new Supervision();
+
+            // 1. Fetch academic events for all modules the student is in
+            $academicEvents = $eventModel->getUserEvents($studentId);
+
+            // 2. Fetch supervision bookings
+            $bookings = $supervisionModel->getStudentBookings($studentId);
+            $supervisionEvents = array_map(function($b) {
+                return [
+                    'id' => 'sup-' . $b['booking_id'],
+                    'title' => 'Supervision - ' . $b['lecturer_first_name'] . ' ' . $b['lecturer_last_name'],
+                    'description' => $b['notes'] ?: '1-on-1 Supervision slot',
+                    'event_type' => 'supervision',
+                    'location' => $b['location'],
+                    'start_time' => $b['start_time'],
+                    'end_time' => $b['end_time'],
+                    'module_id' => null
+                ];
+            }, $bookings);
+
+            // Merge all
+            $allEvents = array_merge($academicEvents, $supervisionEvents);
+
+            // Sort by start_time
+            usort($allEvents, function($a, $b) {
+                return strtotime($a['start_time']) - strtotime($b['start_time']);
+            });
+
+            // 3. Upcoming events (Nearest date first)
+            $now = date('Y-m-d H:i:s');
+            $upcomingEvents = array_filter($allEvents, function($e) use ($now) {
+                return $e['start_time'] >= $now;
+            });
+            
+            // Re-index and take top 5
+            $upcomingEvents = array_slice(array_values($upcomingEvents), 0, 5);
+
+            if (ob_get_length()) ob_end_clean();
+            Response::json([
+                'allEvents' => $allEvents,
+                'upcomingEvents' => $upcomingEvents
+            ]);
+        } catch (Throwable $e) {
+            if (ob_get_length()) ob_end_clean();
+            Response::error('Failed to fetch calendar: ' . $e->getMessage(), 500);
+        }
+    }
+
     public function createEvent() {
         $user = AuthMiddleware::authenticate();
         
