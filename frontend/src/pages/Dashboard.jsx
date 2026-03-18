@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { notificationService } from '../services/notificationService';
 import { eventService } from '../services/eventService';
 import { supervisionService } from '../services/supervisionService';
 
 function Dashboard() {
     const { user } = useAuth();
+    const navigate = useNavigate();
     // Temporary empty state arrays until backend APIs are integrated
     const [upcomingEvents, setUpcomingEvents] = useState([]);
     const [notifications, setNotifications] = useState([]);
@@ -157,9 +159,27 @@ function Dashboard() {
                             <div className="card">
                                 <h3>Quick Actions</h3>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem' }}>
-                                    <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '0.75rem' }}>View Calendar</button>
-                                    <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '0.75rem' }}>Create Event (Lecturer)</button>
-                                    <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '0.75rem' }}>Book Supervision (Student)</button>
+                                    {user?.role === 'admin' && (
+                                        <>
+                                            <button onClick={() => navigate('/calendar')} className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '0.75rem' }}>View Calendar</button>
+                                            <button onClick={() => navigate('/admin/users')} className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '0.75rem' }}>Manage Users</button>
+                                            <button onClick={() => navigate('/admin')} className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '0.75rem' }}>System Dashboard</button>
+                                        </>
+                                    )}
+                                    {user?.role === 'lecturer' && (
+                                        <>
+                                            <button onClick={() => navigate('/calendar')} className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '0.75rem' }}>View Calendar</button>
+                                            <button onClick={() => navigate('/students')} className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '0.75rem' }}>My Students</button>
+                                            <button onClick={() => navigate('/manage-events')} className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '0.75rem' }}>Create Event</button>
+                                        </>
+                                    )}
+                                    {user?.role === 'student' && (
+                                        <>
+                                            <button onClick={() => navigate('/calendar')} className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '0.75rem' }}>View Calendar</button>
+                                            <button onClick={() => navigate('/supervision')} className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '0.75rem' }}>Book Supervision</button>
+                                            <button onClick={() => navigate('/notifications')} className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '0.75rem' }}>My Notifications</button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>
