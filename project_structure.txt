@@ -1,0 +1,264 @@
+
+CampusSync System Project Structure
+
+This document defines the required folder structure, technology stack, and deployment constraints for the CampusSync system.
+The AI must follow this structure when generating code.
+The system must be compatible with the Nuwebspace hosting environment.
+
+--------------------------------------------------
+
+1. Technology Stack
+
+Frontend
+React + Vite
+
+Backend
+PHP REST API
+
+Database
+MySQL
+
+Deployment Environment
+Nuwebspace hosting
+
+File Transfer
+WinSCP
+
+Database Management
+phpMyAdmin
+
+--------------------------------------------------
+
+2. Deployment URL
+
+http://w25037992.nuwebspace.co.uk
+
+--------------------------------------------------
+
+3. System Architecture
+
+The system follows a three-layer architecture.
+
+Presentation Layer
+React frontend responsible for UI rendering.
+
+Application Layer
+PHP backend API responsible for business logic.
+
+Data Layer
+MySQL database responsible for persistent data storage.
+
+System communication flow:
+
+Browser
+→ React frontend
+→ API request
+→ PHP backend
+→ MySQL database
+→ response returned to frontend
+
+--------------------------------------------------
+
+4. Required Project Folder Structure
+
+campussync/
+
+PRD.txt
+design_schema.txt
+timebox.txt
+project_structure.txt
+README.md
+
+/design
+logo.png
+wireframes.png
+
+/database
+schema.sql
+seed_data.sql
+
+/backend
+index.php
+.htaccess
+
+/backend/config
+database.php
+
+/backend/controllers
+AuthController.php
+EventController.php
+NotificationController.php
+SupervisionController.php
+UserController.php
+
+/backend/models
+User.php
+Event.php
+Notification.php
+SupervisionSlot.php
+Booking.php
+Module.php
+
+/backend/routes
+api.php
+
+/backend/middleware
+AuthMiddleware.php
+RoleMiddleware.php
+
+/backend/utils
+Response.php
+Validator.php
+
+/frontend
+package.json
+vite.config.js
+index.html
+
+/frontend/src
+main.jsx
+App.jsx
+
+/frontend/src/pages
+LoginPage.jsx
+Dashboard.jsx
+CalendarPage.jsx
+EventDetails.jsx
+CreateEvent.jsx
+ManageEvents.jsx
+SupervisionBooking.jsx
+PublishSlots.jsx
+Notifications.jsx
+UserManagement.jsx
+ModuleAssignment.jsx
+CalendarIntegration.jsx
+
+/frontend/src/components
+Navbar.jsx
+Sidebar.jsx
+CalendarGrid.jsx
+EventCard.jsx
+NotificationItem.jsx
+BookingCard.jsx
+
+/frontend/src/services
+api.js
+authService.js
+eventService.js
+supervisionService.js
+
+/frontend/src/styles
+global.css
+theme.css
+
+/public
+favicon.ico
+
+--------------------------------------------------
+
+5. Backend Configuration
+
+Backend must be implemented using PHP REST API.
+Node.js or Express servers must NOT be generated because Nuwebspace does not support Node servers.
+
+Database configuration example:
+
+return [
+ 'db_host' => 'nuwebspace_db',
+ 'db_name' => 'w25037992',
+ 'db_user' => 'w25037992',
+ 'db_pass' => '********'
+];
+
+--------------------------------------------------
+
+6. Database Tables
+
+The database schema must follow the ERD defined in the design document.
+
+Required tables:
+
+users
+modules
+user_module
+events
+notifications
+supervision_slots
+bookings
+external_calendar_logs
+
+--------------------------------------------------
+
+7. API Endpoints
+
+Authentication
+
+POST /api/login
+
+Events
+
+GET /api/events
+POST /api/events
+PUT /api/events/{id}
+DELETE /api/events/{id}
+
+Supervision Slots
+
+GET /api/supervision-slots
+POST /api/supervision-slots
+
+Bookings
+
+POST /api/book-slot
+
+Notifications
+
+GET /api/notifications
+
+--------------------------------------------------
+
+8. Frontend Pages
+
+The React frontend must implement the following pages.
+
+Login Page
+Dashboard Page
+Academic Calendar Page
+Event Details Page
+Create Event Page
+Manage Events Page
+Supervision Booking Page
+Publish Supervision Slots Page
+Notifications Page
+User Management Page
+Module Assignment Page
+Calendar Integration Page
+
+--------------------------------------------------
+
+9. UI Requirements
+
+UI must follow the design rules defined in design_schema.txt.
+
+The system must use:
+Blue primary colour palette
+Clean academic interface
+Responsive layout
+Clear navigation structure
+
+--------------------------------------------------
+
+10. Deployment Rules
+
+Frontend must be built using:
+npm run build
+
+The built files must be uploaded to Nuwebspace using WinSCP.
+
+Backend PHP files must be placed in the server directory.
+
+Database schema must be imported using phpMyAdmin.
+
+--------------------------------------------------
+
+End of Document

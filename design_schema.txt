@@ -1,0 +1,168 @@
+
+CampusSync Design System and UI Schema
+
+1. Design Philosophy
+
+The interface must reflect:
+Low cognitive load
+Clear academic structure
+Professional university system appearance
+Simple navigation
+Minimal configuration
+
+The interface must prioritise clarity and information visibility.
+
+
+2. Visual Identity
+
+Logo
+CampusSync logo represents academic scheduling and coordination.
+Visual concept: Calendar icon combined with connected nodes representing synchronisation between students and lecturers.
+
+
+Colour Palette
+
+Primary Dark Blue
+#1E3A5F
+
+Primary Action Blue
+#2563EB
+
+Secondary Blue
+#60A5FA
+
+Text Colour
+#1F2937
+
+Background
+#F3F4F6
+
+
+Usage Rules
+
+Primary Blue
+Buttons and interactive elements
+
+Dark Blue
+Navigation bar and sidebar
+
+Light Grey
+Page background
+
+Charcoal
+Body text
+
+
+3. Typography
+
+Font
+Inter or system sans-serif
+
+Heading Hierarchy
+
+H1
+Page titles
+
+H2
+Section titles
+
+Body
+Regular text
+
+
+4. Layout Structure
+
+Maximum width
+1200px centred layout
+
+Navigation
+
+Top Navigation
+Home
+About
+Support
+User Profile
+
+Left Sidebar Navigation
+
+Dashboard
+Calendar
+Supervision
+Notifications
+Admin
+
+
+5. Core UI Pages
+
+Login Page
+User authentication form
+
+Dashboard Page
+Overview of upcoming academic events
+
+Calendar Page
+Monthly academic calendar view
+
+Event Details Page
+Displays event information
+
+Create Event Page
+Lecturers create academic events
+
+Manage Events Page
+Lecturers manage existing events
+
+Supervision Booking Page
+Students view available supervision slots
+
+Publish Supervision Slots Page
+Lecturers publish supervision availability
+
+Notifications Page
+Displays event updates
+
+User Management Page
+Administrator controls
+
+Module Assignment Page
+Assign users to modules
+
+Calendar Integration Page
+Export academic events
+
+
+6. Calendar UI Layout
+
+Top controls
+
+Search bar
+Module filter dropdown
+Event type filter dropdown
+
+Main section
+
+Monthly calendar grid
+Each day displays event blocks
+
+
+7. Interaction Behaviour
+
+Event Click
+Opens event details modal
+
+Create Event
+Accessible to lecturers only
+
+Supervision Booking
+Students click available slot
+
+Notifications
+Displayed in list format
+
+
+8. Accessibility
+
+Minimum 16px text
+Clear contrast between background and text
+Buttons large enough for comfortable clicking
+Responsive layout for mobile devices

@@ -1,0 +1,208 @@
+
+CampusSync Product Requirements Document (PRD)
+
+1. Product Overview
+CampusSync is a web-based academic scheduling and coordination system designed for university environments.
+The system centralises academic events, supervision bookings, and schedule communication between students and lecturers.
+The primary goal is to reduce fragmentation of academic scheduling information and provide a unified platform for academic event management.
+The system is implemented as a web application hosted on nuwebspace.
+
+Deployment URL:
+http://w25037992.nuwebspace.co.uk
+
+
+2. Target Users
+Primary Users
+- Students
+- Lecturers
+
+Secondary Users
+- System Administrators
+
+
+3. Technology Stack
+
+Frontend
+React
+Vite
+
+Backend
+PHP REST API
+
+Database
+MySQL (via phpMyAdmin)
+
+Deployment Environment
+Nuwebspace hosting
+File transfer via WinSCP
+
+
+4. Core System Architecture
+
+The system follows a three-layer architecture.
+
+Presentation Layer
+React + Vite frontend
+Calendar UI
+Event management forms
+Supervision booking interface
+Notifications UI
+
+Application Layer
+PHP REST API
+Authentication and role control
+Event management logic
+Supervision booking logic
+Notification handling
+
+Data Layer
+MySQL database
+Managed via phpMyAdmin
+
+
+5. Functional Requirements
+
+Must Have
+
+FR1
+Unified academic calendar displaying relevant academic events.
+
+FR2
+Lecturers can create, update, and manage academic events.
+
+FR3
+Students receive notifications when events are added or modified.
+
+FR4
+Events displayed based on user role and access permissions.
+
+FR5
+Students can view events related only to their enrolled modules.
+
+
+Should Have
+
+FR6
+Centralised communication of schedule changes.
+
+FR7
+Quick access to frequently required academic information.
+
+FR10
+Filtering of events by module or event type.
+
+FR11
+Search functionality for locating specific academic events.
+
+
+Could Have
+
+FR8
+Lecturers publish supervision slots.
+
+FR9
+Students book supervision slots.
+
+FR12
+Maintain record of previously created academic events.
+
+
+Won't Have
+
+FR13
+Administrator role management.
+
+FR14
+External calendar integration.
+
+
+6. Non-Functional Requirements
+
+NFR1
+Easy to use with minimal training required.
+Category: Usability
+Priority: Must
+
+NFR2
+Reliably display accurate and up-to-date information.
+Category: Reliability
+Priority: Must
+
+NFR3
+Restrict access based on user roles and permissions.
+Category: Security
+Priority: Must
+
+NFR4
+Function effectively on mobile devices.
+Category: Compatibility
+Priority: Should
+
+NFR5
+Provide timely updates without noticeable delay.
+Category: Performance
+Priority: Should
+
+NFR6
+Load the main calendar view within 2 seconds under normal conditions.
+Category: Performance
+Priority: Should
+
+NFR7
+Prevent unauthorised access to supervision bookings and academic data.
+Category: Security
+Priority: Must
+
+NFR8
+Maintain availability during typical university operating hours.
+Category: Reliability
+Priority: Should
+
+NFR9
+Support scalability for increasing numbers of users and events.
+Category: Scalability
+Priority: Could
+
+NFR10
+No enterprise-level disaster recovery mechanisms included in this release.
+Category: Reliability
+Priority: Won't
+
+
+7. Core Features
+
+Academic Calendar
+Monthly calendar view
+Event display
+Event filtering
+
+Event Management
+Create events
+Edit events
+Delete events
+
+Supervision System
+Publish supervision slots
+Student booking interface
+Prevent double booking
+
+Notification System
+Event updates
+Schedule changes
+
+Search and Filtering
+Search academic events
+Filter by module
+Filter by event type
+
+
+8. Success Criteria
+
+The system will be considered successful if users can:
+
+1. Log in to the platform.
+2. View academic events in a unified calendar.
+3. Lecturers can create and manage events.
+4. Students receive notifications for event changes.
+5. Students can book available supervision slots.
+6. Events can be searched and filtered.

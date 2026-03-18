@@ -1,0 +1,125 @@
+// Default to relative if deployed, or use localhost if local testing (stub proxy setup if needed)
+// As per PRD, the deployment url is http://w25037992.nuwebspace.co.uk
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://w25037992.nuwebspace.co.uk/backend';
+
+export const supervisionService = {
+    // ------------------------------------
+    // LECTURER
+    // ------------------------------------
+    async createSlot(slotData) {
+        let token = localStorage.getItem('token');
+        if (!token) throw new Error('Authentication required');
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+
+        const response = await fetch(`${API_BASE_URL}/api/supervision/slots`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(slotData)
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to publish supervision slot');
+        }
+
+        return await response.json();
+    },
+
+    async getLecturerSlots() {
+        let token = localStorage.getItem('token');
+        if (!token) throw new Error('Authentication required');
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+
+        const response = await fetch(`${API_BASE_URL}/api/supervision/lecturer/slots`, { headers });
+        if (!response.ok) throw new Error('Failed to fetch personal slots');
+
+        return await response.json();
+    },
+
+    // ------------------------------------
+    // STUDENT
+    // ------------------------------------
+
+    async getAvailableSlots() {
+        let token = localStorage.getItem('token');
+        if (!token) throw new Error('Authentication required');
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+
+        const response = await fetch(`${API_BASE_URL}/api/supervision/slots`, { headers });
+        if (!response.ok) throw new Error('Failed to fetch global slots');
+
+        return await response.json();
+    },
+
+    async getMyBookings() {
+        let token = localStorage.getItem('token');
+        if (!token) throw new Error('Authentication required');
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+
+        const response = await fetch(`${API_BASE_URL}/api/supervision/student/bookings`, { headers });
+        if (!response.ok) throw new Error('Failed to fetch personal bookings');
+
+        return await response.json();
+    },
+
+    async bookSlot(slotId, notes = '') {
+        let token = localStorage.getItem('token');
+        if (!token) throw new Error('Authentication required');
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+
+        const response = await fetch(`${API_BASE_URL}/api/supervision/book`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ slot_id: slotId, notes })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to book slot');
+        }
+
+        return await response.json();
+    },
+
+    async cancelBooking(bookingId) {
+        let token = localStorage.getItem('token');
+        if (!token) throw new Error('Authentication required');
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+
+        const response = await fetch(`${API_BASE_URL}/api/supervision/student/bookings/${bookingId}`, {
+            method: 'DELETE',
+            headers
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to cancel booking');
+        }
+
+        return await response.json();
+    }
+};

@@ -1,0 +1,211 @@
+
+CampusSync Development Timebox Plan
+
+This document defines the development timeboxes for implementing the CampusSync system.
+The development process follows a timeboxed Agile approach where features are implemented incrementally based on MoSCoW prioritisation.
+
+--------------------------------------------------
+
+Timebox 1
+Duration: Week 1
+
+Objectives
+Setup development environment and system foundation
+
+Functional Requirements
+FR4 – Display events based on user role and access permissions
+
+Non-Functional Requirements
+NFR3 – Restrict access based on user roles and permissions
+
+Key Implementation Tasks
+- Setup React + Vite frontend project
+- Setup PHP REST API backend
+- Configure MySQL database
+- Configure Nuwebspace connection
+- Implement database schema from ERD
+
+Deliverables
+Running development environment with connected database
+
+--------------------------------------------------
+
+Timebox 2
+Duration: Week 2
+
+Objectives
+Implement unified academic calendar
+
+Functional Requirements
+FR1 – Provide unified academic calendar
+FR5 – Show events only for enrolled modules
+
+Non-Functional Requirements
+NFR6 – Calendar must load within 2 seconds
+
+Key Implementation Tasks
+- Build calendar UI interface
+- Fetch events from database
+- Display module-specific events
+
+Deliverables
+Functional calendar displaying academic events
+
+--------------------------------------------------
+
+Timebox 3
+Duration: Week 3
+
+Objectives
+Implement event management for lecturers
+
+Functional Requirements
+FR2 – Lecturers create, update, and manage events
+
+Non-Functional Requirements
+NFR1 – System must be easy to use
+
+Key Implementation Tasks
+- Create event form
+- Edit event functionality
+- Delete event functionality
+- Manage events page
+
+Deliverables
+Lecturers able to manage academic events
+
+--------------------------------------------------
+
+Timebox 4
+Duration: Week 4
+
+Objectives
+Implement notification and schedule communication system
+
+Functional Requirements
+FR3 – Notify students when events change
+FR6 – Centralised communication of schedule changes
+
+Non-Functional Requirements
+NFR5 – Provide timely updates
+
+Key Implementation Tasks
+- Generate notifications when events are created or updated
+- Build notification interface
+
+Deliverables
+Students receive event update notifications
+
+--------------------------------------------------
+
+Timebox 5
+Duration: Week 5
+
+Objectives
+Improve accessibility and navigation of events
+
+Functional Requirements
+FR7 – Quick access to academic information
+FR10 – Event filtering
+FR11 – Event search
+
+Non-Functional Requirements
+NFR4 – Mobile compatibility
+
+Key Implementation Tasks
+- Implement search functionality
+- Implement event filtering by module or type
+- Improve dashboard navigation
+
+Deliverables
+Searchable and filterable calendar
+
+--------------------------------------------------
+
+Timebox 6
+Duration: Week 6
+
+Objectives
+Implement supervision scheduling system
+
+Functional Requirements
+FR8 – Lecturers publish supervision slots
+FR9 – Students book supervision slots
+
+Non-Functional Requirements
+NFR7 – Prevent unauthorised booking access
+
+Key Implementation Tasks
+- Create supervision slot publishing interface
+- Implement student booking system
+- Prevent double booking
+
+Deliverables
+Supervision booking system
+
+--------------------------------------------------
+
+Timebox 7
+Duration: Week 7
+
+Objectives
+Improve reliability and scalability
+
+Functional Requirements
+FR12 – Maintain record of previously created events
+
+Non-Functional Requirements
+NFR2 – Reliable system operation
+NFR8 – Maintain system availability
+NFR9 – Support scalability
+
+Key Implementation Tasks
+- Store event history
+- Improve database reliability
+- Optimise system performance
+
+Deliverables
+Stable system with historical event records
+
+--------------------------------------------------
+
+Timebox 8
+Duration: Week 8
+
+Objectives
+Final system optimisation and testing
+
+Non-Functional Requirements
+NFR1 – Usability
+NFR5 – Performance
+
+Key Implementation Tasks
+- System testing
+- Security testing
+- Bug fixing
+- User testing
+
+Deliverables
+Final deployable system
+
+--------------------------------------------------
+
+Notes
+
+Must requirements implemented early
+FR1–FR5 appear in early timeboxes.
+
+Should requirements implemented mid-development
+FR6, FR7, FR10, FR11 appear in middle timeboxes.
+
+Could requirements implemented later
+FR8, FR9, FR12 appear in later timeboxes.
+
+Won’t requirements excluded from implementation
+FR13 – Administrator role management
+FR14 – External calendar integration
+NFR10 – Enterprise disaster recovery
+
+--------------------------------------------------
+
+End of Document

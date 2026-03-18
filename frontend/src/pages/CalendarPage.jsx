@@ -1,0 +1,191 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import Navbar from '../components/Navbar';
+import Sidebar from '../components/Sidebar';
+import CalendarGrid from '../components/CalendarGrid';
+import { eventService } from '../services/eventService';
+import { supervisionService } from '../services/supervisionService';
+import { adminService } from '../services/adminService';
+import { useAuth } from '../context/AuthContext';
+
+function CalendarPage() {
+    const { user } = useAuth();
+    const [events, setEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    // Filter and search states
+    const [searchQuery, setSearchQuery] = useState('');
+    const [moduleFilter, setModuleFilter] = useState('');
+    const [typeFilter, setTypeFilter] = useState('');
+    const [moduleMap, setModuleMap] = useState({});
+
+    useEffect(() => {
+        const fetchEvents = async () => {
+            if (!user) return; // Wait for auth context
+
+            setLoading(true);
+            try {
+                // Fetch primary events
+                const data = await eventService.getEvents();
+
+                // If student, also fetch their personal booked supervision slots
+                let supervisionEvents = [];
+                if (user.role === 'student') {
+                    try {
+                        const bookings = await supervisionService.getMyBookings();
+                        supervisionEvents = bookings.map(b => ({
+                            id: `sup-${b.booking_id}`, // Prefix ID to avoid collisions
+                            title: `Supervision - ${b.lecturer_first_name} ${b.lecturer_last_name}`,
+                            description: b.notes || '1-on-1 Supervision slot',
+                            event_type: 'supervision',
+                            location: b.location,
+                            start_time: b.start_time,
+                            end_time: b.end_time,
+                            module_id: null // Supervisions are generally global or manually linked
+                        }));
+                    } catch (err) {
+                        console.error("Failed to load supervision events for calendar", err);
+                    }
+                }
+
+                // If lecturer, they might want to see slots they are hosting?
+                // For now, the prompt emphasized students seeing their booked slots.
+                if (user.role === 'lecturer' || user.role === 'admin') {
+                    try {
+                        const hostedSlots = await supervisionService.getLecturerSlots();
+                        supervisionEvents = hostedSlots.map(s => ({
+                            id: `sup-${s.id}`,
+                            title: `Hosting Supervision`,
+                            description: `${s.booked_count} student(s) booked`,
+                            event_type: 'supervision',
+                            location: s.location,
+                            start_time: s.start_time,
+                            end_time: s.end_time,
+                            module_id: null
+                        }));
+                    } catch (err) {
+                        console.error("Failed to load hosted slots for calendar", err);
+                    }
+                }
+
+                setEvents([...data, ...supervisionEvents]);
+            } catch (error) {
+                console.error("Failed to fetch events", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        const fetchModules = async () => {
+            if (!user) return;
+            try {
+                const modules = await adminService.getModules();
+                const map = {};
+                modules.forEach(m => {
+                    map[m.id] = `${m.module_code} - ${m.module_name}`;
+                });
+                setModuleMap(map);
+            } catch (err) {
+                console.error("Failed to load modules for filter names", err);
+            }
+        };
+
+        fetchEvents();
+        fetchModules();
+    }, [user]);
+
+    // Derive unique modules and types for dropdown options
+    const uniqueModules = useMemo(() => {
+        const modules = events.map(e => e.module_id).filter(Boolean);
+        return [...new Set(modules)];
+    }, [events]);
+
+    const uniqueTypes = useMemo(() => {
+        const types = events.map(e => e.event_type).filter(Boolean);
+        return [...new Set(types)];
+    }, [events]);
+
+    // Apply filters to events
+    const filteredEvents = useMemo(() => {
+        return events.filter(e => {
+            const searchLower = searchQuery.toLowerCase();
+            const matchesSearch = (e.title?.toLowerCase() || '').includes(searchLower) ||
+                (e.description?.toLowerCase() || '').includes(searchLower);
+
+            const matchesModule = moduleFilter ? String(e.module_id) === String(moduleFilter) : true;
+            const matchesType = typeFilter ? (e.event_type?.toLowerCase() || '') === typeFilter.toLowerCase() : true;
+
+            return matchesSearch && matchesModule && matchesType;
+        });
+    }, [events, searchQuery, moduleFilter, typeFilter]);
+
+    return (
+        <div className="app-container" style={{ flexDirection: 'column' }}>
+            <Navbar />
+            <div className="main-flex">
+                <Sidebar />
+                <main className="main-content">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <h2 style={{ margin: 0 }}>Calendar</h2>
+
+                        {/* Calendar Controls */}
+                        <div className="calendar-controls">
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    placeholder="Search events..."
+                                    style={{ width: '200px', padding: '0.5rem 1rem' }}
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <select
+                                    className="form-input"
+                                    style={{ width: '160px', padding: '0.5rem 1rem' }}
+                                    value={moduleFilter}
+                                    onChange={(e) => setModuleFilter(e.target.value)}
+                                >
+                                    <option value="">All Modules</option>
+                                    {uniqueModules.map(mod => (
+                                        <option key={mod} value={mod}>
+                                            {moduleMap[mod] || `Module ID: ${mod}`}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <select
+                                    className="form-input"
+                                    style={{ width: '160px', padding: '0.5rem 1rem' }}
+                                    value={typeFilter}
+                                    onChange={(e) => setTypeFilter(e.target.value)}
+                                >
+                                    <option value="">All Types</option>
+                                    {uniqueTypes.map(type => (
+                                        <option key={type} value={type}>
+                                            {/* Capitalize first letter */}
+                                            {type.charAt(0).toUpperCase() + type.slice(1)}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
+                        {loading ? (
+                            <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-color-light)' }}>
+                                <p>Loading your schedule...</p>
+                            </div>
+                        ) : (
+                            <CalendarGrid events={filteredEvents} />
+                        )}
+                    </div>
+                </main>
+            </div>
+        </div>
+    );
+}
+
+export default CalendarPage;
