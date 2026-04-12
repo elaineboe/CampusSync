@@ -88,18 +88,18 @@ function StudentsPage() {
 
                     {/* Table View (Reusing Admin component rendering logic) */}
                     <div className="card" style={{ padding: 0, overflow: 'hidden', marginBottom: '2rem', border: '1px solid var(--border-color)', borderRadius: '0' }}>
-                        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                             <input 
                                 type="text"
                                 placeholder="SEARCH STUDENTS"
                                 className="form-input"
-                                style={{ width: '300px', marginBottom: '0', height: '40px' }}
+                                style={{ width: '300px', marginBottom: '0', height: '40px', flex: '1 1 auto' }}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
 
-                        <div style={{ overflowX: 'auto' }}>
+                        <div className="table-responsive">
                             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '2px solid black', backgroundColor: '#f8fafc' }}>
@@ -173,14 +173,14 @@ function StudentsPage() {
                                 Schedule for {selectedStudent.first_name} {selectedStudent.last_name}
                             </h2>
 
-                             <div className="card" style={{ marginBottom: '2rem', padding: '1.5rem', border: '1px solid #000', borderRadius: '0', backgroundColor: '#f8fafc' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                             <div className="card student-profile-card" style={{ marginBottom: '2rem', padding: '1.5rem', border: '1px solid #000', borderRadius: '0', backgroundColor: '#f8fafc' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>
                                     <div>
                                         <h3 style={{ margin: '0 0 0.5rem 0', textTransform: 'uppercase' }}>{selectedStudent.first_name} {selectedStudent.last_name}</h3>
                                         <p style={{ margin: '0.25rem 0', fontWeight: 'bold' }}>ID: {selectedStudent.username}</p>
                                         <p style={{ margin: '0.25rem 0', fontWeight: 'bold' }}>EMAIL: {selectedStudent.email}</p>
                                     </div>
-                                    <div style={{ textAlign: 'right' }}>
+                                    <div style={{ textAlign: 'right', flex: '1 1 auto' }}>
                                         <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.85rem', fontWeight: 'bold', textTransform: 'uppercase' }}>Enrolled Modules</p>
                                         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                                             {studentModules.map(m => (
@@ -193,7 +193,7 @@ function StudentsPage() {
                                 </div>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '2rem' }}>
+                            <div className="schedule-detail-grid">
                                 <div className="card" style={{ padding: 0, borderRadius: 0, border: '1px solid #000', overflow: 'hidden' }}>
                                     {isCalendarLoading ? (
                                         <div style={{ padding: '4rem', textAlign: 'center' }}>Loading calendar data...</div>
@@ -202,7 +202,7 @@ function StudentsPage() {
                                     )}
                                 </div>
 
-                                <div>
+                                <div className="upcoming-events-panel">
                                     <h3 style={{ textTransform: 'uppercase', fontSize: '1rem', marginBottom: '1rem', borderBottom: '2px solid #000', paddingBottom: '0.5rem' }}>Upcoming Events</h3>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                         {upcomingEvents.length === 0 ? (
@@ -237,6 +237,16 @@ function StudentsPage() {
                 @keyframes fadeIn {
                     from { opacity: 0; transform: translateY(10px); }
                     to { opacity: 1; transform: translateY(0); }
+                }
+                .schedule-detail-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 300px;
+                    gap: 2rem;
+                }
+                @media (max-width: 1024px) {
+                    .schedule-detail-grid {
+                        grid-template-columns: 1fr;
+                    }
                 }
             `}</style>
         </div>

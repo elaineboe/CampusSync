@@ -108,7 +108,7 @@ function CalendarPage() {
             <div className="main-flex">
                 <Sidebar />
                 <main className="main-content">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                         <h2 style={{ margin: 0 }}>
                             {targetStudentInfo 
                                 ? `Calendar for ${targetStudentInfo.first_name} ${targetStudentInfo.last_name}` 

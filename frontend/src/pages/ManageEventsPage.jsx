@@ -135,7 +135,7 @@ function ManageEventsPage() {
                             ) : events.length === 0 ? (
                                 <p style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-color-light)' }}>No managed events found.</p>
                             ) : (
-                                <div style={{ overflowX: 'auto' }}>
+                                <div className="table-responsive">
                                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                                         <thead>
                                             <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--primary-dark-blue)' }}>

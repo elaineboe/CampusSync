@@ -76,6 +76,7 @@ button {
   display: flex;
   flex: 1;
   width: 100%;
+  flex-direction: row; /* Sidebar on the left */
 }
 
 .main-content {
@@ -84,6 +85,8 @@ button {
   flex-direction: column;
   padding: 2rem;
   background-color: var(--white);
+  transition: padding 0.3s ease;
+  min-width: 0; /* Important for flex children to not overflow */
 }
 
 /* Auth Pages */
@@ -102,23 +105,52 @@ button {
   gap: 1.5rem;
 }
 
-.sidebar {
+/* Vertical Sidebar on the Side (Desktop) */
+.sidebar-vertical {
   width: 240px;
   background-color: var(--white);
   border-right: 1px solid var(--border-color);
   padding: 2rem 1.25rem;
   min-height: calc(100vh - 70px);
+  flex-shrink: 0;
 }
 
+.nav-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Calendar Filter Controls - Horizontal on Desktop */
 .calendar-controls {
   display: flex;
-  gap: 1rem;
+  flex-direction: row;
   align-items: center;
-  flex-wrap: wrap;
+  gap: 1rem;
+  flex-wrap: wrap; /* Wraps gracefully if space is limited */
+}
+
+/* Responsive Table Utility */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.table-responsive table {
+  min-width: 600px; /* Force scroll on small screens */
+  width: 100%;
 }
 
 /* Mobile Responsiveness (NFR4) */
 @media (max-width: 768px) {
+  .main-content {
+    padding: 1rem !important;
+  }
+
   .dashboard-grid {
     grid-template-columns: 1fr;
   }
@@ -127,23 +159,9 @@ button {
     flex-direction: column;
   }
 
-  .sidebar {
-    width: 100%;
-    min-height: auto;
-    border-right: none;
-    border-bottom: 1px solid var(--border-color);
-    padding: 1rem;
-  }
-
-  .sidebar nav {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-
-  .sidebar a {
-    flex: 1 1 auto;
-    text-align: center;
+  /* Hide the desktop sidebar on mobile, using unified navbar hamburger instead */
+  .sidebar-vertical {
+    display: none !important;
   }
 
   .calendar-controls {

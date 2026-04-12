@@ -2,17 +2,22 @@ import React, { useState } from 'react';
 
 function CalendarGrid({ events }) {
     const [selectedEvent, setSelectedEvent] = useState(null);
-
-    // Simplistic monthly view for current month
-    // Real implementation might allow month toggles, but this satisfies Timebox 2
     const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth();
+    
+    // Initialize view to current month
+    const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+
+    const year = viewDate.getFullYear();
+    const month = viewDate.getMonth();
+
+    const nextMonth = () => setViewDate(new Date(year, month + 1, 1));
+    const prevMonth = () => setViewDate(new Date(year, month - 1, 1));
+    const goToToday = () => setViewDate(new Date(today.getFullYear(), today.getMonth(), 1));
 
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const firstDay = new Date(year, month, 1).getDay();
 
-    const monthName = today.toLocaleString('default', { month: 'long' });
+    const monthName = viewDate.toLocaleString('default', { month: 'long' });
 
     // Create array of day objects
     const days = [];
@@ -30,108 +35,153 @@ function CalendarGrid({ events }) {
     const closeModal = () => setSelectedEvent(null);
 
     return (
-        <div style={styles.outerContainer}>
-            <div style={styles.calendarHeader}>
-                <h3 style={styles.monthYearTitle}>{monthName} {year}</h3>
-                <div style={styles.todayIndicator}>
-                    <span style={styles.todayBadgeSmall}></span> Today: {today.toLocaleDateString()}
-                </div>
-            </div>
+        <>
+            {/* Mobile Overrides */}
+            <style>{`
+                @media (max-width: 768px) {
+                    .calendar-grid-container {
+                        gap: 1px !important;
+                    }
+                    .calendar-cell {
+                        min-height: 70px !important;
+                        padding: 0.25rem !important;
+                    }
+                    .calendar-header-cell {
+                        padding: 0.5rem 0.25rem !important;
+                        font-size: 0.65rem !important;
+                    }
+                    .calendar-date-number {
+                        font-size: 0.75rem !important;
+                        margin-bottom: 0.25rem !important;
+                    }
+                    .calendar-event-item {
+                        font-size: 0.6rem !important;
+                        padding: 2px 4px !important;
+                    }
+                    .calendar-header-compact {
+                        flex-direction: column;
+                        align-items: flex-start !important;
+                        padding: 1rem !important;
+                        gap: 0.5rem;
+                    }
+                    .calendar-title-mobile {
+                        font-size: 1.125rem !important;
+                    }
+                }
+            `}</style>
 
-            <div style={styles.container}>
-                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                    <div key={day} style={styles.headerCell}>{day}</div>
-                ))}
-
-                {days.map((date, index) => {
-                    if (!date) return <div key={`empty-${index}`} style={styles.emptyCell}></div>;
-
-                    // Find events for this day
-                    const dayEvents = events.filter(e => {
-                        const eventDate = new Date(e.start_time);
-                        return eventDate.getFullYear() === date.getFullYear() &&
-                            eventDate.getMonth() === date.getMonth() &&
-                            eventDate.getDate() === date.getDate();
-                    });
-
-                    return (
-                        <div key={date.toISOString()} style={styles.cell}>
-                            <div style={styles.dateNumber}>
-                                <span style={date.toDateString() === today.toDateString() ? styles.todayBadge : {}}>
-                                    {date.getDate()}
-                                </span>
-                            </div>
-                            <div style={styles.eventsContainer}>
-                                {dayEvents.map(event => (
-                                    <div 
-                                        key={event.id} 
-                                        style={{
-                                            ...styles.eventItem,
-                                            backgroundColor: event.type === 'supervision_booking' ? '#ecfdf5' : 'var(--secondary-blue)',
-                                            color: event.type === 'supervision_booking' ? '#065f46' : 'var(--white)',
-                                            borderLeft: event.type === 'supervision_booking' ? '4px solid #10b981' : '4px solid var(--primary-action-blue)',
-                                            fontWeight: '600'
-                                        }}
-                                        onClick={() => setSelectedEvent(event)}
-                                    >
-                                        {event.type === 'supervision_booking' ? '📅 ' : ''}{event.title}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-
-            {/* Event Detail Modal */}
-            {selectedEvent && (
-                <div style={styles.modalOverlay} onClick={closeModal}>
-                    <div style={styles.modalContent} onClick={e => e.stopPropagation()}>
-                        <div style={{
-                            ...styles.modalHeader,
-                            backgroundColor: selectedEvent.type === 'supervision_booking' ? '#ecfdf5' : 'var(--secondary-blue)',
-                            borderBottom: selectedEvent.type === 'supervision_booking' ? '3px solid #10b981' : '3px solid var(--primary-action-blue)',
-                            color: selectedEvent.type === 'supervision_booking' ? '#065f46' : 'var(--white)'
-                        }}>
-                            <h2 style={{ margin: 0, fontSize: '1.25rem' }}>
-                                {selectedEvent.type === 'supervision_booking' ? '📅 ' : ''}{selectedEvent.title}
-                            </h2>
-                            <button onClick={closeModal} style={styles.closeButton}>&times;</button>
-                        </div>
-                        <div style={styles.modalBody}>
-                            <div style={styles.detailRow}>
-                                <strong>Type:</strong> 
-                                <span style={{
-                                    padding: '2px 8px',
-                                    borderRadius: '12px',
-                                    fontSize: '0.75rem',
-                                    marginLeft: '8px',
-                                    backgroundColor: selectedEvent.type === 'supervision_booking' ? '#10b981' : 'var(--primary-action-blue)',
-                                    color: 'white'
-                                }}>
-                                    {selectedEvent.type === 'supervision_booking' ? 'Supervision Booking' : 'Module Event'}
-                                </span>
-                            </div>
-                            <div style={styles.detailRow}>
-                                <strong>Date:</strong> {selectedEvent.date || new Date(selectedEvent.start_time).toLocaleDateString()}
-                            </div>
-                            <div style={styles.detailRow}>
-                                <strong>Time:</strong> {selectedEvent.time ? selectedEvent.time.slice(0, 5) : new Date(selectedEvent.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </div>
-                            <div style={styles.detailRow}>
-                                <strong>Location:</strong> {selectedEvent.location || 'TBA'}
-                            </div>
-                            {selectedEvent.description && (
-                                <div style={{ marginTop: '1rem' }}>
-                                    <strong>Description:</strong>
-                                    <p style={styles.modalDescription}>{selectedEvent.description}</p>
-                                </div>
-                            )}
+            <div style={styles.outerContainer}>
+                <div style={styles.calendarHeader} className="calendar-header-compact">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <h3 style={styles.monthYearTitle} className="calendar-title-mobile">{monthName} {year}</h3>
+                        <div style={{ display: 'flex', gap: '0.25rem' }}>
+                            <button onClick={prevMonth} style={styles.navButton} title="Previous Month">&lt;</button>
+                            <button onClick={nextMonth} style={styles.navButton} title="Next Month">&gt;</button>
                         </div>
                     </div>
+                    <div style={styles.todayIndicator}>
+                        <button onClick={goToToday} style={{ ...styles.todayButton, border: 'none', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: 0 }}>
+                            <span style={styles.todayBadgeSmall}></span> Today: {today.toLocaleDateString()}
+                        </button>
+                    </div>
                 </div>
-            )}
-        </div>
+
+                <div style={styles.container} className="calendar-grid-container">
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                        <div key={day} style={styles.headerCell} className="calendar-header-cell">{day}</div>
+                    ))}
+
+                    {days.map((date, index) => {
+                        if (!date) return <div key={`empty-${index}`} style={styles.emptyCell} className="calendar-cell"></div>;
+
+                        // Find events for this day
+                        const dayEvents = events.filter(e => {
+                            const eventDate = new Date(e.start_time);
+                            return eventDate.getFullYear() === date.getFullYear() &&
+                                eventDate.getMonth() === date.getMonth() &&
+                                eventDate.getDate() === date.getDate();
+                        });
+
+                        return (
+                            <div key={date.toISOString()} style={styles.cell} className="calendar-cell">
+                                <div style={styles.dateNumber} className="calendar-date-number">
+                                    <span style={date.toDateString() === today.toDateString() ? styles.todayBadge : {}}>
+                                        {date.getDate()}
+                                    </span>
+                                </div>
+                                <div style={styles.eventsContainer}>
+                                    {dayEvents.map(event => (
+                                        <div 
+                                            key={event.id} 
+                                            style={{
+                                                ...styles.eventItem,
+                                                backgroundColor: event.type === 'supervision_booking' ? '#ecfdf5' : 'var(--secondary-blue)',
+                                                color: event.type === 'supervision_booking' ? '#065f46' : 'var(--white)',
+                                                borderLeft: event.type === 'supervision_booking' ? '4px solid #10b981' : '4px solid var(--primary-action-blue)',
+                                                fontWeight: '600'
+                                            }}
+                                            onClick={() => setSelectedEvent(event)}
+                                            className="calendar-event-item"
+                                        >
+                                            {event.type === 'supervision_booking' ? '📅 ' : ''}{event.title}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {/* Event Detail Modal */}
+                {selectedEvent && (
+                    <div style={styles.modalOverlay} onClick={closeModal}>
+                        <div style={styles.modalContent} onClick={e => e.stopPropagation()}>
+                            <div style={{
+                                ...styles.modalHeader,
+                                backgroundColor: selectedEvent.type === 'supervision_booking' ? '#ecfdf5' : 'var(--secondary-blue)',
+                                borderBottom: selectedEvent.type === 'supervision_booking' ? '3px solid #10b981' : '3px solid var(--primary-action-blue)',
+                                color: selectedEvent.type === 'supervision_booking' ? '#065f46' : 'var(--white)'
+                            }}>
+                                <h2 style={{ margin: 0, fontSize: '1.25rem' }}>
+                                    {selectedEvent.type === 'supervision_booking' ? '📅 ' : ''}{selectedEvent.title}
+                                </h2>
+                                <button onClick={closeModal} style={styles.closeButton}>&times;</button>
+                            </div>
+                            <div style={styles.modalBody}>
+                                <div style={styles.detailRow}>
+                                    <strong>Type:</strong> 
+                                    <span style={{
+                                        padding: '2px 8px',
+                                        borderRadius: '12px',
+                                        fontSize: '0.75rem',
+                                        marginLeft: '8px',
+                                        backgroundColor: selectedEvent.type === 'supervision_booking' ? '#10b981' : 'var(--primary-action-blue)',
+                                        color: 'white'
+                                    }}>
+                                        {selectedEvent.type === 'supervision_booking' ? 'Supervision Booking' : 'Module Event'}
+                                    </span>
+                                </div>
+                                <div style={styles.detailRow}>
+                                    <strong>Date:</strong> {selectedEvent.date || new Date(selectedEvent.start_time).toLocaleDateString()}
+                                </div>
+                                <div style={styles.detailRow}>
+                                    <strong>Time:</strong> {selectedEvent.time ? selectedEvent.time.slice(0, 5) : new Date(selectedEvent.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </div>
+                                <div style={styles.detailRow}>
+                                    <strong>Location:</strong> {selectedEvent.location || 'TBA'}
+                                </div>
+                                {selectedEvent.description && (
+                                    <div style={{ marginTop: '1rem' }}>
+                                        <strong>Description:</strong>
+                                        <p style={styles.modalDescription}>{selectedEvent.description}</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </>
     );
 }
 
@@ -312,6 +362,21 @@ const styles = {
         borderRadius: '8px',
         marginTop: '0.5rem',
         border: '1px solid #e2e8f0',
+    },
+    navButton: {
+        width: '32px',
+        height: '32px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: '6px',
+        border: '1px solid var(--border-color)',
+        backgroundColor: '#fff',
+        color: 'var(--text-color)',
+        fontSize: '1rem',
+        fontWeight: '700',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
     }
 };
 

@@ -119,18 +119,18 @@ function UserManagementPage() {
                     <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
                         
                         {/* Header Banner inside card matching wireframe logic */}
-                        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                             <input 
                                 type="text"
                                 placeholder="SEARCH USERS"
                                 className="form-input"
-                                style={{ width: '300px', marginBottom: '0', height: '40px' }}
+                                style={{ width: '300px', marginBottom: '0', height: '40px', flex: '1 1 auto' }}
                                 value={searchQuery}
                                 onChange={handleSearchChange}
                             />
                             <button 
                                 className="btn btn-primary" 
-                                style={{ backgroundColor: 'black', color: 'white', borderRadius: '4px', textTransform: 'uppercase', fontSize: '0.875rem', height: '40px', padding: '0 1.5rem' }}
+                                style={{ backgroundColor: 'black', color: 'white', borderRadius: '4px', textTransform: 'uppercase', fontSize: '0.875rem', height: '40px', padding: '0 1.5rem', flex: '0 0 auto' }}
                                 onClick={() => setIsCreateOpen(!isCreateOpen)}
                             >
                                 {isCreateOpen ? 'CANCEL' : 'ADD USER'}
@@ -181,7 +181,7 @@ function UserManagementPage() {
                         {isLoading ? (
                             <p style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-color-light)' }}>Loading users...</p>
                         ) : (
-                            <div style={{ overflowX: 'auto' }}>
+                            <div className="table-responsive">
                                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                                     <thead>
                                         <tr style={{ borderBottom: '2px solid black', backgroundColor: 'var(--white)' }}>

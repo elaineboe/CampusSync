@@ -179,8 +179,10 @@ function SupervisionPage() {
                                             <p style={{ color: 'var(--text-color-light)', marginTop: '1rem' }}>You have no active supervision slots.</p>
                                         ) : (
                                             <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                                {slots.map(slot => (
-                                                    <div key={slot.id} style={{ border: '1px solid var(--border-color)', borderRadius: '6px', padding: '1rem' }}>
+                                                {slots
+                                                    .filter(slot => new Date(slot.start_time.replace(/-/g, '/')) > new Date())
+                                                    .map(slot => (
+                                                        <div key={slot.id} style={{ border: '1px solid var(--border-color)', borderRadius: '6px', padding: '1rem' }}>
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                                                             <strong>{formatTime(slot.start_time)}</strong>
                                                             <span style={{ fontSize: '0.875rem', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '2px 8px', borderRadius: '12px' }}>
@@ -258,9 +260,11 @@ function SupervisionPage() {
                                         {myBookings.length === 0 ? (
                                             <p style={{ color: 'var(--text-color-light)', marginTop: '1rem' }}>You haven't booked any supervisions yet.</p>
                                         ) : (
-                                            <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                                {myBookings.map(b => (
-                                                    <div key={b.booking_id} style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                                {myBookings
+                                                    .filter(b => new Date(b.start_time.replace(/-/g, '/')) > new Date())
+                                                    .map(b => (
+                                                        <div key={b.booking_id} style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                         <div>
                                                             <p style={{ margin: '0 0 0.25rem 0', fontWeight: '600', color: '#166534' }}>{b.lecturer_first_name} {b.lecturer_last_name}</p>
                                                             <p style={{ margin: 0, fontSize: '0.875rem', color: '#15803d' }}>{formatTime(b.start_time)} • {b.location || 'TBA'}</p>

@@ -44,10 +44,7 @@ function LoginPage() {
                     <span style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--primary-dark-blue)' }}>CampusSync</span>
                 </div>
                 <nav style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-                    <span style={{ color: 'var(--text-color-light)', fontWeight: '500', fontSize: '0.875rem' }}>Home</span>
-                    <span style={{ color: 'var(--text-color-light)', fontWeight: '500', fontSize: '0.875rem' }}>About</span>
-                    <span style={{ color: 'var(--text-color-light)', fontWeight: '500', fontSize: '0.875rem' }}>Support</span>
-                    <Link to="/register" className="btn btn-outline" style={{ marginLeft: '1rem', padding: '0.5rem 1.25rem', textDecoration: 'none' }}>Register</Link>
+                    {/* Navigation links removed as requested */}
                 </nav>
             </header>
 
@@ -66,11 +63,12 @@ function LoginPage() {
                         {error && <div style={{ color: '#dc2626', marginBottom: '1rem', textAlign: 'center', fontSize: '0.875rem' }}>{error}</div>}
 
                         <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                            <label className="form-label">EMAIL (INPUT FIELD)</label>
+                            <label className="form-label">EMAIL</label>
                             <input
                                 type="text"
                                 className="form-input"
                                 placeholder="Enter your university email"
+                                style={{ backgroundColor: '#eef2ff', border: '1px solid #e2e8f0' }}
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
@@ -78,11 +76,12 @@ function LoginPage() {
                         </div>
 
                         <div className="form-group" style={{ marginBottom: '2rem' }}>
-                            <label className="form-label">PASSWORD (INPUT FIELD)</label>
+                            <label className="form-label">PASSWORD</label>
                             <input
                                 type="password"
                                 className="form-input"
                                 placeholder="Enter your password"
+                                style={{ backgroundColor: '#eef2ff', border: '1px solid #e2e8f0' }}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
@@ -92,15 +91,11 @@ function LoginPage() {
                         <button
                             type="submit"
                             className="btn btn-outline"
-                            style={{ width: '100%', justifyContent: 'center', padding: '0.75rem', marginBottom: '1.5rem' }}
+                            style={{ width: '100%', justifyContent: 'center', padding: '0.75rem', marginBottom: '0.5rem', color: 'var(--primary-action-blue)', borderColor: 'var(--primary-action-blue)' }}
                             disabled={isLoading}
                         >
-                            {isLoading ? 'Logging in...' : 'Login (Button)'}
+                            {isLoading ? 'Logging in...' : 'Login'}
                         </button>
-
-                        <div style={{ textAlign: 'center' }}>
-                            <a href="#" style={{ textDecoration: 'underline', fontSize: '0.875rem', color: 'var(--text-color)', fontWeight: '600' }}>Forgot Password?</a>
-                        </div>
                     </form>
                 </div>
             </div>
