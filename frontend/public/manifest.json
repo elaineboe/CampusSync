@@ -8,9 +8,9 @@
   "description": "CampusSync",
   "icons": [
     {
-      "src": "logo.svg",
+      "src": "logo.png",
       "sizes": "192x192 512x512 any",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
