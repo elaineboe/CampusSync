@@ -30,8 +30,9 @@ function Sidebar() {
 
                 {role === 'admin' && (
                     <>
-                        <Link to="/admin" style={{ ...styles.link, ...(isActive('/admin') && !isActive('/admin/users') ? styles.activeLink : {}) }}>Module Assignment</Link>
+                        <Link to="/admin" style={{ ...styles.link, ...(isActive('/admin') && !isActive('/admin/users') && !isActive('/admin/calendar-integration') ? styles.activeLink : {}) }}>Module Assignment</Link>
                         <Link to="/admin/users" style={{ ...styles.link, ...(isActive('/admin/users') ? styles.activeLink : {}) }}>User Management</Link>
+                        <Link to="/admin/calendar-integration" style={{ ...styles.link, ...(isActive('/admin/calendar-integration') ? styles.activeLink : {}) }}>Calendar Integration</Link>
                     </>
                 )}
             </nav>

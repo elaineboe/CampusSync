@@ -9,6 +9,7 @@ import NotificationsPage from './pages/NotificationsPage';
 import SupervisionPage from './pages/SupervisionPage';
 import AdminPage from './pages/AdminPage';
 import UserManagementPage from './pages/UserManagementPage';
+import CalendarIntegrationPage from './pages/CalendarIntegrationPage';
 import StudentsPage from './pages/StudentsPage';
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
                             <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
                                 <Route path="/admin" element={<AdminPage />} />
                                 <Route path="/admin/users" element={<UserManagementPage />} />
+                                <Route path="/admin/calendar-integration" element={<CalendarIntegrationPage />} />
                             </Route>
                         </Route>
 
