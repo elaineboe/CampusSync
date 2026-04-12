@@ -14,7 +14,7 @@ class SupervisionController {
     public function getLecturerSlots() {
         $user = AuthMiddleware::authenticate();
         
-        if (!isset($user['role']) || ($user['role'] !== 'lecturer' && $user['role'] !== 'admin')) {
+        if (!isset($user['role']) || $user['role'] !== 'lecturer') {
             Response::error('Unauthorized: Only lecturers can manage hosted slots', 403);
         }
 
@@ -28,7 +28,7 @@ class SupervisionController {
     public function createSlot() {
         $user = AuthMiddleware::authenticate();
         
-        if (!isset($user['role']) || ($user['role'] !== 'lecturer' && $user['role'] !== 'admin')) {
+        if (!isset($user['role']) || $user['role'] !== 'lecturer') {
             Response::error('Unauthorized: Only lecturers manage hosted slots', 403);
         }
 
@@ -75,7 +75,7 @@ class SupervisionController {
 
         $targetUserId = $user['id'];
         if (isset($_GET['student_id'])) {
-            if ($user['role'] === 'lecturer' || $user['role'] === 'admin') {
+            if ($user['role'] === 'lecturer') {
                 $targetUserId = intval($_GET['student_id']);
             } else {
                 Response::error('Unauthorized: Students can only view their own bookings', 403);

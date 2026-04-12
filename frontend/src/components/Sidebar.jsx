@@ -19,7 +19,9 @@ function Sidebar() {
                 <Link to="/dashboard" style={{ ...styles.link, ...(isActive('/dashboard') ? styles.activeLink : {}) }}>Dashboard</Link>
                 <Link to="/calendar" style={{ ...styles.link, ...(isActive('/calendar') ? styles.activeLink : {}) }}>Calendar</Link>
                 <Link to="/notifications" style={{ ...styles.link, ...(isActive('/notifications') ? styles.activeLink : {}) }}>Notifications</Link>
-                <Link to="/supervision" style={{ ...styles.link, ...(isActive('/supervision') ? styles.activeLink : {}) }}>Supervision</Link>
+                {role !== 'admin' && (
+                    <Link to="/supervision" style={{ ...styles.link, ...(isActive('/supervision') ? styles.activeLink : {}) }}>Supervision</Link>
+                )}
 
                 {(role === 'lecturer' || role === 'admin') && (
                     <>

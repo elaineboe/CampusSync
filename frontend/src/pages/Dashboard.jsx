@@ -35,7 +35,7 @@ function Dashboard() {
                         start_time: b.start_time,
                         end_time: b.end_time
                     }));
-                } else if (user.role === 'lecturer' || user.role === 'admin') {
+                } else if (user.role === 'lecturer') {
                     const hostedSlots = await supervisionService.getLecturerSlots();
                     supervisionEvents = hostedSlots.map(s => ({
                         id: `sup-${s.id}`,

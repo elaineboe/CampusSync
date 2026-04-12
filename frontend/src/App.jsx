@@ -26,7 +26,10 @@ function App() {
                             <Route path="/dashboard" element={<Dashboard />} />
                             <Route path="/calendar" element={<CalendarPage />} />
                             <Route path="/notifications" element={<NotificationsPage />} />
-                            <Route path="/supervision" element={<SupervisionPage />} />
+
+                            <Route element={<ProtectedRoute allowedRoles={['student', 'lecturer']} />}>
+                                <Route path="/supervision" element={<SupervisionPage />} />
+                            </Route>
 
                             {/* Role-specific Example */}
                             <Route element={<ProtectedRoute allowedRoles={['lecturer', 'admin']} />}>
